@@ -1,21 +1,22 @@
-public string {Titulo} { get; set; }  // Title
-public string {Anios} { get; set; }    // Year
-public string {Clasificacion} { get; set; }  // Rated
-public string {FechaEstreno} { get; set; }  // Released
-public string {Duracion} { get; set; }     // Runtime
-public string {Genero} { get; set; }      // Genre
-public string {Director} { get; set; }     // Director
-public string {Guionista} { get; set; }    // Writer
-public string {Actores} { get; set; }      // Actors
-public string {Sinopsis} { get; set; }     // Plot
-public string {Idioma} { get; set; }       // Language
-public string {Pais} { get; set; }        // Country
-public string {Premios} { get; set; }      // Awards
-public string {Poster} { get; set; }       // Poster
-public List<Rating> {Calificaciones} { get; set; }  // Ratings (Assuming a Rating class exists)
-public string {Metacritic} { get; set; }    // Metascore
-public string {ImdbRating} { get; set; }     // imdbRating
-public string {ImdbVotos} { get; set; }      // imdbVotes
-public string {ImdbID} { get; set; }        // imdbID
-public string {Tipo} { get; set; }         // Type
-public string {TotalTemporadas} { get; set; }  // totalSeasons
+    public string Title { get; set; }
+    public string Year { get; set; }
+    public string Rated { get; set; }
+    public string Released { get; set; }
+    public string Runtime { get; set; }
+    public string Genre { get; set; }
+    public string Director { get; set; }
+    public string Writer { get; set; }
+    public string Actors { get; set; }
+    public string Plot { get; set; }
+    public string Language { get; set; }
+    public string Country { get; set; }
+    public string Awards { get; set; }
+    public string Poster { get; set; }
+    public List<Rating> Ratings { get; set; }
+    public string Metascore { get; set; }
+    public decimal ImdbRating { get; set; } // Assuming decimal for rating
+    public int ImdbVotes { get; set; }
+    public string ImdbID { get; set; }
+    public string Type { get; set; }
+    public int TotalSeasons { get; set; } // Assuming integer for total seasons
+    public bool Response { get; set; }
