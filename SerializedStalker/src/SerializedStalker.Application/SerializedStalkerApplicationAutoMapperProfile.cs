@@ -11,7 +11,12 @@ public class SerializedStalkerApplicationAutoMapperProfile : Profile
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
 
+        //Serie
         CreateMap<Serie, SerieDto>();
         CreateMap<CreateUpdateSerieDto, Serie>();
+
+        //Episodio
+        CreateMap<Episodio, EpisodioDto>();
+        CreateMap<CreateUpdateEpisodioDto, Episodio>();
     }
 }

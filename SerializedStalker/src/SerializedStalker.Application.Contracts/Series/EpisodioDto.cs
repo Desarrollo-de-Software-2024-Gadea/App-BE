@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Domain.Entities;
+using Volo.Abp.Application.Dtos;
 
 namespace SerializedStalker.Series
 {
-    public class Episodio : Entity<int>
+    public class EpisodioDto : EntityDto<int>
     {
         public string Titulo { get; set; }
         public DateOnly FechaLanzamiento { get; set; }
@@ -16,6 +16,5 @@ namespace SerializedStalker.Series
         public string Duracion { get; set; }
         public string Directores { get; set; }
         public string Escritores { get; set; }
-
     }
 }
