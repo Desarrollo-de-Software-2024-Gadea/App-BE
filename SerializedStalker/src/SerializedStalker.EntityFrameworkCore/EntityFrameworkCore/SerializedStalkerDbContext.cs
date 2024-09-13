@@ -28,7 +28,11 @@ public class SerializedStalkerDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
+    //Serie
     public DbSet<Serie> Series { get; set; }
+
+    //Episodio
+    public DbSet<Episodio> Episodios { get; set; }
 
 
     #region Entities from the modules
@@ -83,7 +87,7 @@ public class SerializedStalkerDbContext :
         builder.ConfigureBlobStoring();
 
         /* Configure your own tables/entities inside here */
-
+        //Serie
         builder.Entity<Serie>(b =>
         {
             b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Series",
@@ -107,7 +111,20 @@ public class SerializedStalkerDbContext :
             b.Property(x => x.Tipo).IsRequired().HasMaxLength(128);
             b.Property(x => x.TotalTemporadas).IsRequired(); // No aplica HasMaxLength porque es un int
         });
-
+        //Episodio
+        builder.Entity<Episodio>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Episodios",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaLanzamiento).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Resumen).IsRequired().HasMaxLength(300);
+            b.Property(x => x.NumeroEpisodio).IsRequired(); 
+        });
         //builder.Entity<YourEntity>(b =>
         //{
         //    b.ToTable(SerializedStalkerConsts.DbTablePrefix + "YourEntities", SerializedStalkerConsts.DbSchema);
