@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities;
 
-namespace SerializedStalker.Serie
+namespace SerializedStalker.Series
 {
     public class Serie : AggregateRoot<int>
     {
