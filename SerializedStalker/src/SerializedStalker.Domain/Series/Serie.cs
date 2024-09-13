@@ -25,7 +25,8 @@ namespace SerializedStalker.Series
         public int ImdbVotos { get; set; } 
         public string ImdbID { get; set; }
         public string Tipo { get; set; } 
-        public int TotalTemporadas { get; set; } 
+        public int TotalTemporadas { get; set; }
+        public ICollection<Episodio> Episodios { get; set; }
 
     }
 }

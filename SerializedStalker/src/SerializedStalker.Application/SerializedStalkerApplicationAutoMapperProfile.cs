@@ -17,6 +17,5 @@ public class SerializedStalkerApplicationAutoMapperProfile : Profile
 
         //Episodio
         CreateMap<Episodio, EpisodioDto>();
-        CreateMap<CreateUpdateEpisodioDto, Episodio>();
     }
 }
