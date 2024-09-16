@@ -32,13 +32,6 @@ namespace SerializedStalker.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
                     b.Property<string>("Directores")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -54,13 +47,7 @@ namespace SerializedStalker.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<DateOnly>("FechaLanzamiento")
-                        .HasMaxLength(128)
+                    b.Property<DateOnly>("FechaEstreno")
                         .HasColumnType("date");
 
                     b.Property<int>("NumeroEpisodio")
@@ -68,8 +55,11 @@ namespace SerializedStalker.Migrations
 
                     b.Property<string>("Resumen")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("TemporadaID")
+                        .HasColumnType("int");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
@@ -77,6 +67,8 @@ namespace SerializedStalker.Migrations
                         .HasColumnType("nvarchar(128)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TemporadaID");
 
                     b.ToTable("AppEpisodios", (string)null);
                 });
@@ -141,7 +133,7 @@ namespace SerializedStalker.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("ImdbID")
+                    b.Property<string>("ImdbIdentificator")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
@@ -185,6 +177,36 @@ namespace SerializedStalker.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppSeries", (string)null);
+                });
+
+            modelBuilder.Entity("SerializedStalker.Series.Temporada", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("FechaLanzamiento")
+                        .HasMaxLength(128)
+                        .HasColumnType("date");
+
+                    b.Property<int>("NumeroTemporada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SerieID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SerieID");
+
+                    b.ToTable("AppTemporadas", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -2060,6 +2082,28 @@ namespace SerializedStalker.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
+            modelBuilder.Entity("SerializedStalker.Series.Episodio", b =>
+                {
+                    b.HasOne("SerializedStalker.Series.Temporada", "Temporada")
+                        .WithMany("Episodios")
+                        .HasForeignKey("TemporadaID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Temporada");
+                });
+
+            modelBuilder.Entity("SerializedStalker.Series.Temporada", b =>
+                {
+                    b.HasOne("SerializedStalker.Series.Serie", "Serie")
+                        .WithMany("Temporadas")
+                        .HasForeignKey("SerieID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Serie");
+                });
+
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
                 {
                     b.HasOne("Volo.Abp.AuditLogging.AuditLog", null)
@@ -2209,6 +2253,16 @@ namespace SerializedStalker.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SerializedStalker.Series.Serie", b =>
+                {
+                    b.Navigation("Temporadas");
+                });
+
+            modelBuilder.Entity("SerializedStalker.Series.Temporada", b =>
+                {
+                    b.Navigation("Episodios");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

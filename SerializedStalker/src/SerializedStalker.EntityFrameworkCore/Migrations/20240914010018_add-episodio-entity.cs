@@ -6,20 +6,20 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SerializedStalker.Migrations
 {
     /// <inheritdoc />
-    public partial class addepisodioentity : Migration
+    public partial class addTemporadaentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppEpisodios",
+                name: "AppTemporadas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Titulo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     FechaLanzamiento = table.Column<DateOnly>(type: "date", maxLength: 128, nullable: false),
-                    NumeroEpisodio = table.Column<int>(type: "int", nullable: false),
+                    NumeroTemporada = table.Column<int>(type: "int", nullable: false),
                     Resumen = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Duracion = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Directores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
@@ -29,7 +29,7 @@ namespace SerializedStalker.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppEpisodios", x => x.Id);
+                    table.PrimaryKey("PK_AppTemporadas", x => x.Id);
                 });
         }
 
@@ -37,7 +37,7 @@ namespace SerializedStalker.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppEpisodios");
+                name: "AppTemporadas");
         }
     }
 }

@@ -27,6 +27,6 @@ namespace SerializedStalker.Series
         public string Tipo { get; set; }
         public int TotalTemporadas { get; set; }
 
-        public ICollection<EpisodioDto> Episodios { get; set; }
+        public ICollection<TemporadaDto> Temporadas { get; set; }
     }
 }

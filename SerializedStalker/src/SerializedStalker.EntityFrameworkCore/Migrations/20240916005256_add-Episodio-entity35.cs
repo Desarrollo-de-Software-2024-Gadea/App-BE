@@ -5,7 +5,7 @@
 namespace SerializedStalker.Migrations
 {
     /// <inheritdoc />
-    public partial class addTemporadaentity2 : Migration
+    public partial class addEpisodioentity35 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

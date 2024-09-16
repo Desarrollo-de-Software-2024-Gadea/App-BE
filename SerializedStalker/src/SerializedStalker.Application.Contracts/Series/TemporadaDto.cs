@@ -7,14 +7,12 @@ using Volo.Abp.Application.Dtos;
 
 namespace SerializedStalker.Series
 {
-    public class EpisodioDto : EntityDto<int>
+    public class TemporadaDto : EntityDto<int>
     {
         public string Titulo { get; set; }
         public DateOnly FechaLanzamiento { get; set; }
-        public int NumeroEpisodio { get; set; }
-        public string Resumen { get; set; }
-        public string Duracion { get; set; }
-        public string Directores { get; set; }
-        public string Escritores { get; set; }
+        public int NumeroTemporada { get; set; }
+        //Relación uno a muchos
+        //public ICollection<Episodio> Episodios { get; set; }
     }
 }

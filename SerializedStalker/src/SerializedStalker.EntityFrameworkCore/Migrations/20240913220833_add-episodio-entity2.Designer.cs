@@ -13,8 +13,8 @@ using Volo.Abp.EntityFrameworkCore;
 namespace SerializedStalker.Migrations
 {
     [DbContext(typeof(SerializedStalkerDbContext))]
-    [Migration("20240913220833_add-episodio-entity2")]
-    partial class addepisodioentity2
+    [Migration("20240913220833_add-temporada-entity2")]
+    partial class addTemporadaentity2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,7 +27,7 @@ namespace SerializedStalker.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SerializedStalker.Series.Episodio", b =>
+            modelBuilder.Entity("SerializedStalker.Series.Temporada", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,7 +66,7 @@ namespace SerializedStalker.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("date");
 
-                    b.Property<int>("NumeroEpisodio")
+                    b.Property<int>("NumeroTemporada")
                         .HasColumnType("int");
 
                     b.Property<string>("Resumen")
@@ -81,7 +81,7 @@ namespace SerializedStalker.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppEpisodios", (string)null);
+                    b.ToTable("AppTemporadas", (string)null);
                 });
 
             modelBuilder.Entity("SerializedStalker.Series.Serie", b =>
