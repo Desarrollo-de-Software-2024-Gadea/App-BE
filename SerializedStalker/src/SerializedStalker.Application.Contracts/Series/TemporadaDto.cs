@@ -12,7 +12,11 @@ namespace SerializedStalker.Series
         public string Titulo { get; set; }
         public DateOnly FechaLanzamiento { get; set; }
         public int NumeroTemporada { get; set; }
-        //Relación uno a muchos
-        //public ICollection<Episodio> Episodios { get; set; }
+
+        //Foreign key
+        public int SerieID { get; set; }
+
+        //Relación uno a muchos con Episodio
+        public ICollection<EpisodioDto> Episodios { get; set; }
     }
 }

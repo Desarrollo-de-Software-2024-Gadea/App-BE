@@ -17,5 +17,8 @@ public class SerializedStalkerApplicationAutoMapperProfile : Profile
 
         //Temporada
         CreateMap<Temporada, TemporadaDto>();
+
+        //Episodio
+        CreateMap<Episodio, EpisodioDto>();
     }
 }
