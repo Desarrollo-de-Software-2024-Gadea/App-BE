@@ -14,6 +14,8 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using SerializedStalker.Series;
+using SerializedStalker.ListasDeSeguimiento;
 
 namespace SerializedStalker.EntityFrameworkCore;
 
@@ -26,6 +28,18 @@ public class SerializedStalkerDbContext :
     IIdentityDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+
+    //Serie
+    public DbSet<Serie> Series { get; set; }
+
+    //Temporada
+    public DbSet<Temporada> Temporadas { get; set; }
+
+    //Episodio
+    public DbSet<Episodio> Episodios { get; set; }
+
+    //Lista de seguimiento
+    public DbSet<ListaDeSeguimiento> ListasDeSeguimientos { get; set; }
 
 
     #region Entities from the modules
@@ -78,8 +92,90 @@ public class SerializedStalkerDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureTenantManagement();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
+        //Serie
+        builder.Entity<Serie>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Series",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Clasificacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaEstreno).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Generos).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Actores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Sinopsis).IsRequired().HasMaxLength(300);
+            b.Property(x => x.Idiomas).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Pais).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Poster).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbPuntuacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbVotos).IsRequired(); // No aplica HasMaxLength porque es un int
+            b.Property(x => x.ImdbIdentificator).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Tipo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.TotalTemporadas).IsRequired(); // No aplica HasMaxLength porque es un int
+            // Relación con Temporadas
+            b.HasMany(s => s.Temporadas)
+             .WithOne(t => t.Serie)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+        //Temporada
+        builder.Entity<Temporada>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Temporadas",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaLanzamiento).IsRequired().HasMaxLength(128);
+            b.Property(x => x.NumeroTemporada).IsRequired();
+
+           // Relación con Serie
+            b.HasOne(t => t.Serie)
+             .WithMany(s => s.Temporadas)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+            // Relación con Episodios
+            b.HasMany(t => t.Episodios)
+             .WithOne(e => e.Temporada)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+        //Episodio
+        builder.Entity<Episodio>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Episodios",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Resumen).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaEstreno).IsRequired();
+            b.Property(x => x.NumeroEpisodio).IsRequired();
+            b.HasOne(e => e.Temporada)
+             .WithMany(t => t.Episodios)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //Lista de seguimiento
+        builder.Entity<ListaDeSeguimiento>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "ListasDeSeguimiento",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.FechaModificacion).IsRequired();
+
+        });
 
         //builder.Entity<YourEntity>(b =>
         //{
