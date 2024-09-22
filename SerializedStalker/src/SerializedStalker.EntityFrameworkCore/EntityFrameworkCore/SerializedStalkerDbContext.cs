@@ -15,6 +15,7 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using SerializedStalker.Series;
+using SerializedStalker.ListasDeSeguimiento;
 
 namespace SerializedStalker.EntityFrameworkCore;
 
@@ -36,6 +37,9 @@ public class SerializedStalkerDbContext :
 
     //Episodio
     public DbSet<Episodio> Episodios { get; set; }
+
+    //Lista de seguimiento
+    public DbSet<ListaDeSeguimiento> ListasDeSeguimientos { get; set; }
 
 
     #region Entities from the modules
@@ -161,6 +165,16 @@ public class SerializedStalkerDbContext :
              .WithMany(t => t.Episodios)
              .HasForeignKey(e => e.TemporadaID)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //Lista de seguimiento
+        builder.Entity<ListaDeSeguimiento>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "ListasDeSeguimiento",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.FechaModificacion).IsRequired();
+
         });
 
         //builder.Entity<YourEntity>(b =>
