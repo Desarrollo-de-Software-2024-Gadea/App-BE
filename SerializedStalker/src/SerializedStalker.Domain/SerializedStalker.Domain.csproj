@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SerializedStalker.Application.Contracts\SerializedStalker.Application.Contracts.csproj" />
     <ProjectReference Include="..\SerializedStalker.Domain.Shared\SerializedStalker.Domain.Shared.csproj" />
   </ItemGroup>
 
