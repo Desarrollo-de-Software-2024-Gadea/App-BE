@@ -6,6 +6,8 @@ using Volo.Abp.AutoMapper;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Modularity;
 using Volo.Abp.TenantManagement;
+using Microsoft.Extensions.DependencyInjection;
+using SerializedStalker.Series;
 
 namespace SerializedStalker;
 
@@ -27,5 +29,7 @@ public class SerializedStalkerApplicationModule : AbpModule
         {
             options.AddMaps<SerializedStalkerApplicationModule>();
         });
+
+        context.Services.AddTransient<ISeriesApiService, OmdbService>();
     }
 }

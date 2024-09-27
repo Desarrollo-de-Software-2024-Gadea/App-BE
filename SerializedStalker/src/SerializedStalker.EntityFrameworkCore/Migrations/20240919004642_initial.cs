@@ -427,6 +427,37 @@ namespace SerializedStalker.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppSeries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titulo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Clasificacion = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    FechaEstreno = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Duracion = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Generos = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Directores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Escritores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Actores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Sinopsis = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    Idiomas = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Pais = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Poster = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ImdbPuntuacion = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ImdbVotos = table.Column<int>(type: "int", nullable: false),
+                    ImdbIdentificator = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    TotalTemporadas = table.Column<int>(type: "int", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppSeries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictApplications",
                 columns: table => new
                 {
@@ -745,6 +776,28 @@ namespace SerializedStalker.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppTemporadas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titulo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    FechaLanzamiento = table.Column<DateOnly>(type: "date", maxLength: 128, nullable: false),
+                    NumeroTemporada = table.Column<int>(type: "int", nullable: false),
+                    SerieID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppTemporadas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppTemporadas_AppSeries_SerieID",
+                        column: x => x.SerieID,
+                        principalTable: "AppSeries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictAuthorizations",
                 columns: table => new
                 {
@@ -795,6 +848,32 @@ namespace SerializedStalker.Migrations
                         name: "FK_AbpEntityPropertyChanges_AbpEntityChanges_EntityChangeId",
                         column: x => x.EntityChangeId,
                         principalTable: "AbpEntityChanges",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppEpisodios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NumeroEpisodio = table.Column<int>(type: "int", nullable: false),
+                    FechaEstreno = table.Column<DateOnly>(type: "date", nullable: false),
+                    Titulo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Directores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Escritores = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Duracion = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Resumen = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    TemporadaID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppEpisodios", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppEpisodios_AppTemporadas_TemporadaID",
+                        column: x => x.TemporadaID,
+                        principalTable: "AppTemporadas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1074,6 +1153,16 @@ namespace SerializedStalker.Migrations
                 column: "UserName");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppEpisodios_TemporadaID",
+                table: "AppEpisodios",
+                column: "TemporadaID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppTemporadas_SerieID",
+                table: "AppTemporadas",
+                column: "SerieID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
                 table: "OpenIddictApplications",
                 column: "ClientId");
@@ -1183,6 +1272,9 @@ namespace SerializedStalker.Migrations
                 name: "AbpUserTokens");
 
             migrationBuilder.DropTable(
+                name: "AppEpisodios");
+
+            migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
 
             migrationBuilder.DropTable(
@@ -1207,10 +1299,16 @@ namespace SerializedStalker.Migrations
                 name: "AbpUsers");
 
             migrationBuilder.DropTable(
+                name: "AppTemporadas");
+
+            migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");
 
             migrationBuilder.DropTable(
                 name: "AbpAuditLogs");
+
+            migrationBuilder.DropTable(
+                name: "AppSeries");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictApplications");
