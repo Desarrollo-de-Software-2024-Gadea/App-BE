@@ -34,7 +34,7 @@ namespace SerializedStalker.Series
             foreach (var serie in series)
             {
                 // Consultar la API para obtener los detalles más recientes
-                var apiSeries = await _seriesApiService.BuscarPorTituloAsync(serie.Titulo);
+                var apiSeries = await _seriesApiService.BuscarSerieAsync(serie.Titulo);
 
                 if (apiSeries != null && apiSeries.Length > 0)
                 {
