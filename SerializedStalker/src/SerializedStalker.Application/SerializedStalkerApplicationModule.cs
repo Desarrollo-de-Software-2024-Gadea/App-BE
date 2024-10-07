@@ -1,35 +1,27 @@
-﻿using Volo.Abp.PermissionManagement;
-using Volo.Abp.SettingManagement;
-using Volo.Abp.Account;
-using Volo.Abp.Identity;
-using Volo.Abp.AutoMapper;
-using Volo.Abp.FeatureManagement;
+﻿using Volo.Abp.AutoMapper;
 using Volo.Abp.Modularity;
-using Volo.Abp.TenantManagement;
 using Microsoft.Extensions.DependencyInjection;
 using SerializedStalker.Series;
 
-namespace SerializedStalker;
-
-[DependsOn(
-    typeof(SerializedStalkerDomainModule),
-    typeof(SerializedStalkerApplicationContractsModule),
-    typeof(AbpPermissionManagementApplicationModule),
-    typeof(AbpFeatureManagementApplicationModule),
-    typeof(AbpIdentityApplicationModule),
-    typeof(AbpAccountApplicationModule),
-    typeof(AbpTenantManagementApplicationModule),
-    typeof(AbpSettingManagementApplicationModule)
-    )]
-public class SerializedStalkerApplicationModule : AbpModule
+namespace SerializedStalker
 {
-    public override void ConfigureServices(ServiceConfigurationContext context)
+    [DependsOn(
+        typeof(SerializedStalkerDomainModule)
+    )]
+    public class SerializedStalkerApplicationModule : AbpModule
     {
-        Configure<AbpAutoMapperOptions>(options =>
+        public override void ConfigureServices(ServiceConfigurationContext context)
         {
-            options.AddMaps<SerializedStalkerApplicationModule>();
-        });
+            Configure<AbpAutoMapperOptions>(options =>
+            {
+                options.AddMaps<SerializedStalkerApplicationModule>();
+            });
 
-        context.Services.AddTransient<ISeriesApiService, OmdbService>();
+            // Registrar el servicio de dominio
+            context.Services.AddTransient<SerieUpdateService>();
+
+            // Registrar el worker como un IHostedService
+            context.Services.AddHostedService<SerieUpdateChecker>();
+        }
     }
 }
