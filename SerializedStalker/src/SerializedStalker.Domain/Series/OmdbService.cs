@@ -104,6 +104,55 @@ namespace SerializedStalker.Series
             }
         }
 
+        public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada)
+        {
+            if (string.IsNullOrWhiteSpace(imdbId))
+            {
+                throw new ArgumentException("El identificador IMDb es obligatorio para buscar una temporada.", nameof(imdbId));
+            }
+
+            var url = $"{BaseUrl}?apikey={ApiKey}&i={imdbId}&season={numeroTemporada}";
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(jsonResponse);
+
+                if (json["Response"]?.ToString() == "False")
+                {
+                    return null;
+                }
+
+                var episodiosJson = json["Episodes"];
+                if (episodiosJson == null)
+                {
+                    return null;
+                }
+
+                var episodiosList = new List<EpisodioDto>();
+                foreach (var episodio in episodiosJson)
+                {
+                    episodiosList.Add(new EpisodioDto
+                    {
+                        Titulo = episodio["Title"]?.ToString(),
+                        NumeroEpisodio = int.TryParse(episodio["Episode"]?.ToString(), out var episodioNum) ? episodioNum : 0,
+                        FechaEstreno = DateOnly.TryParse(episodio["Released"]?.ToString(), out var fecha) ? fecha : DateOnly.MinValue
+                    });
+                }
+
+                return new TemporadaDto
+                {
+                    Titulo = json["Title"]?.ToString(),
+                    NumeroTemporada = int.TryParse(json["Season"]?.ToString(), out var seasonNumber) ? seasonNumber : 0,
+                    Episodios = episodiosList
+                };
+            }
+        }
+
+
         private async Task<SerieDto> ObtenerDetallesSerieAsync(string imdbId)
         {
             var url = $"{BaseUrl}?apikey={ApiKey}&i={imdbId}";
