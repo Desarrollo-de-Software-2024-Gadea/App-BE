@@ -16,6 +16,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using SerializedStalker.Series;
 using SerializedStalker.ListasDeSeguimiento;
+using SerializedStalker.Domain.Notificaciones;
 
 namespace SerializedStalker.EntityFrameworkCore;
 
@@ -41,6 +42,8 @@ public class SerializedStalkerDbContext :
     //Lista de seguimiento
     public DbSet<ListaDeSeguimiento> ListasDeSeguimientos { get; set; }
 
+    //Notificación
+    public DbSet<Notificacion> Notificaciones { get; set; }
 
     #region Entities from the modules
 
@@ -177,6 +180,20 @@ public class SerializedStalkerDbContext :
 
         });
 
+        //Notificación
+        builder.Entity<Notificacion>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Notificacion",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.UsuarioId).IsRequired();
+            b.Property(x => x.Titulo).IsRequired();
+            b.Property(x => x.Mensaje).IsRequired();
+            b.Property(x => x.Leida).IsRequired();
+            b.Property(x => x.Tipo).IsRequired();
+            b.Property(x => x.FechaCreacion).IsRequired();
+
+        });
         //builder.Entity<YourEntity>(b =>
         //{
         //    b.ToTable(SerializedStalkerConsts.DbTablePrefix + "YourEntities", SerializedStalkerConsts.DbSchema);

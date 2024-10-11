@@ -9,18 +9,18 @@ using Volo.Abp.EntityFrameworkCore;
 
 namespace SerializedStalker.EntityFrameworkCore.Notificaciones
 {
-    /*public class NotificacionRepository : EfCoreRepository<MyDbContext, Notificacion, int>, INotificacionRepository
+    public class NotificacionRepository : EfCoreRepository<SerializedStalkerDbContext, Notificacion, int>, INotificacionRepository
     {
-        public NotificacionRepository(IDbContextProvider<MyDbContext> dbContextProvider)
+        public NotificacionRepository(IDbContextProvider<SerializedStalkerDbContext> dbContextProvider)
             : base(dbContextProvider)
         {
         }
 
-        public async Task<List<Notificacion>> GetNotificacionesNoLeidasAsync(Guid usuarioId)
+        public async Task<List<Notificacion>> GetNotificacionesNoLeidasAsync(int usuarioId)
         {
             return await DbSet
                 .Where(n => n.UsuarioId == usuarioId && !n.Leida)
                 .ToListAsync();
         }
-    }*/
+    }
 }

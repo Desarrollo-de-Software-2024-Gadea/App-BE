@@ -1,5 +1,4 @@
 ﻿using SerializedStalker.Application.Contracts.Notificaciones;
-using SerializedStalker.Domain.Notificaciones;
 using SerializedStalker.Notificaciones;
 using System.Threading.Tasks;
 

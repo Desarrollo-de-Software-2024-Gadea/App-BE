@@ -15,6 +15,8 @@ namespace SerializedStalker.Domain.Notificaciones
         public string Mensaje { get; set; }
         public bool Leida { get; set; }
         public TipoNotificacion Tipo { get; set; }
+        public DateTime FechaCreacion { get; set; }
+
     }
 
 }
