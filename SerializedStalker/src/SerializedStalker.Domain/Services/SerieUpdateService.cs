@@ -25,7 +25,7 @@ namespace SerializedStalker.Series
 
             foreach (var serie in series)
             {
-                var apiSeries = await _seriesApiService.BuscarSerieAsync(serie.Titulo, null);
+                var apiSeries = await _seriesApiService.BuscarSerieAsync(serie.Titulo, serie.Generos);//Cambio null por generos
 
                 if (apiSeries != null && apiSeries.Length > 0)
                 {
@@ -74,7 +74,9 @@ namespace SerializedStalker.Series
                                     }
 
                                     // Persistir los cambios en la temporada
-                                    await _temporadaRepository.UpdateAsync(ultimaTemporadaLocal);
+                                    //GADEA: Deberiamos persistir los cambios en la serie, no hay ninguna razon para guardar las temporadas.
+                                    //await _temporadaRepository.UpdateAsync(ultimaTemporadaLocal);
+                                    await _serieRepository.UpdateAsync(serie);
 
                                     // Generar y persistir la notificación para la serie (esto dependerá de tu implementación de notificaciones)
                                     // CrearNotificacion(serie, episodiosNuevos);
