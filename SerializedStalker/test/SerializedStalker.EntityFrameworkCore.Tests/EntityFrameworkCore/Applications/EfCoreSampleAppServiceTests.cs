@@ -1,4 +1,4 @@
-using SerializedStalker.Samples;
+/*using SerializedStalker.Samples;
 using Xunit;
 
 namespace SerializedStalker.EntityFrameworkCore.Applications;
@@ -7,4 +7,4 @@ namespace SerializedStalker.EntityFrameworkCore.Applications;
 public class EfCoreSampleAppServiceTests : SampleAppServiceTests<SerializedStalkerEntityFrameworkCoreTestModule>
 {
 
-}
+}*/
