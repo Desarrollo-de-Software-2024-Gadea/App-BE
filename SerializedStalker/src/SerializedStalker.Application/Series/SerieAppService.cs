@@ -13,15 +13,22 @@ namespace SerializedStalker.Series
     {
         private readonly ISeriesApiService _seriesApiService;
 
-        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService) : base(repository)
+        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService)
+            : base(repository)
         {
             _seriesApiService = seriesApiService;
         }
 
-        // Hacer que el parámetro 'genero' sea opcional
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
             return await _seriesApiService.BuscarSerieAsync(titulo, genero);
         }
+
+        // Nuevo método para buscar temporadas
+        public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada)
+        {
+            return await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+        }
     }
 }
+
