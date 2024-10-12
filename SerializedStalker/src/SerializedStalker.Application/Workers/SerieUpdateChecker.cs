@@ -9,12 +9,13 @@ namespace SerializedStalker.Series
     public class SerieUpdateChecker : IHostedService, IDisposable
     {
         private readonly ILogger<SerieUpdateChecker> _logger;
-        private readonly SerieUpdateService _serieUpdateService;
+        private readonly ISerieUpdateService _serieUpdateService; // Usando la interfaz
         private Timer _timer;
+        private bool _isRunning; // Añadido para controlar si el timer está activo
 
         public SerieUpdateChecker(
             ILogger<SerieUpdateChecker> logger,
-            SerieUpdateService serieUpdateService)
+            ISerieUpdateService serieUpdateService)
         {
             _logger = logger;
             _serieUpdateService = serieUpdateService;
@@ -22,28 +23,40 @@ namespace SerializedStalker.Series
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            if (_isRunning) // Verificar si ya está en ejecución
+            {
+                return Task.CompletedTask; // No iniciar de nuevo
+            }
+
             _logger.LogInformation("SerieUpdateChecker starting.");
-
-            // Configurar el worker para que ejecute la verificación cada 24 horas (86400000 ms = 24 horas)
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(86400000));
-
+            _isRunning = true; // Marcar como en ejecución
             return Task.CompletedTask;
         }
 
-        private async void DoWork(object state)
+        public void DoWork(object state)
         {
-            _logger.LogInformation("SerieUpdateChecker running verification.");
+            _ = DoWorkAsync(state); // Llamada asincrónica
+        }
 
-            // Llamar al servicio de dominio para verificar y actualizar las series
+        private async Task DoWorkAsync(object state)
+        {
+            if (_serieUpdateService == null)
+            {
+                _logger.LogWarning("SerieUpdateService is not initialized.");
+                return; // Manejo de la situación donde el servicio es null
+            }
+
+            _logger.LogInformation("SerieUpdateChecker running verification.");
             await _serieUpdateService.VerificarYActualizarSeriesAsync();
         }
+
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("SerieUpdateChecker stopping.");
-
             _timer?.Change(Timeout.Infinite, 0);
-
+            _isRunning = false; // Marcar como no en ejecución
             return Task.CompletedTask;
         }
 

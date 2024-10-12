@@ -7,7 +7,7 @@ using SerializedStalker.Notificaciones;
 
 namespace SerializedStalker.Series
 {
-    public class SerieUpdateService : DomainService
+    public class SerieUpdateService : DomainService, ISerieUpdateService // Implementa la interfaz
     {
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
@@ -63,13 +63,13 @@ namespace SerializedStalker.Series
                             var tituloNotificacionTemporada = $"Nueva temporada disponible de {serie.Titulo}";
                             var mensajeNotificacionTemporada = $"La temporada {nuevaTemporadaNumero} ya está disponible en {serie.Titulo}.";
 
-                            var usuarioId = 001; // No tenemos todavía la parte de usuarios implementada, así que lo hacemos así por ahora
+                            var usuarioId = 001; // Suponiendo un usuario por defecto
 
-                            //Los usuarios pueden elegir si quieren notificaciones por mail o pantalla
+                            // Los usuarios pueden elegir si quieren notificaciones por mail o pantalla
                             await _notificacionService.CrearYEnviarNotificacionAsync(
                                 usuarioId, tituloNotificacionTemporada, mensajeNotificacionTemporada, TipoNotificacion.Email);
                             await _notificacionService.CrearYEnviarNotificacionAsync(
-                                        usuarioId, tituloNotificacionTemporada, mensajeNotificacionTemporada, TipoNotificacion.Pantalla);
+                                usuarioId, tituloNotificacionTemporada, mensajeNotificacionTemporada, TipoNotificacion.Pantalla);
                         }
                     }
 
@@ -121,7 +121,7 @@ namespace SerializedStalker.Series
                                     var tituloNotificacion = $"Nuevos episodios en {serie.Titulo}";
                                     var mensajeNotificacion = $"Se han añadido {episodiosNuevos.Count} nuevos episodios en la serie {serie.Titulo}.";
 
-                                    var usuarioId = 001; // No tenemos todavía la parte de usuarios implementada, así que lo hacemos así por ahora
+                                    var usuarioId = 001; // Suponiendo un usuario por defecto
 
                                     // Notificar al usuario sobre los nuevos episodios
                                     await _notificacionService.CrearYEnviarNotificacionAsync(
