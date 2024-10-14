@@ -40,11 +40,13 @@ namespace SerializedStalker.Tests.Series
                 TotalTemporadas = 1,
                 Temporadas = new List<Temporada>()
             };
+
             var seriesList = new List<Serie> { serie };
-            var apiSerie = new SerieDto { TotalTemporadas = 2 };
+            var apiSerie = new SerieDto { TotalTemporadas = 2, ImdbID = "tt123456" };
 
             _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(seriesList);
+
             _seriesApiServiceMock.Setup(s => s.BuscarSerieAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new[] { apiSerie });
 
@@ -53,25 +55,17 @@ namespace SerializedStalker.Tests.Series
                 NumeroTemporada = 2,
                 Episodios = new List<EpisodioDto>
         {
-            new EpisodioDto { NumeroEpisodio = 1, Titulo = "Nuevo episodio", FechaEstreno = DateOnly.FromDateTime(System.DateTime.Now) }
+            new EpisodioDto { NumeroEpisodio = 1, Titulo = "Nuevo episodio", FechaEstreno = DateOnly.FromDateTime(DateTime.Now) }
         }
             };
+
             _seriesApiServiceMock.Setup(s => s.BuscarTemporadaAsync(It.IsAny<string>(), 2))
                 .ReturnsAsync(nuevaTemporada);
 
             // Act
-            try
-            {
-                await _serieUpdateService.VerificarYActualizarSeriesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception during test execution: {ex.Message}");
-                throw; // Vuelve a lanzar la excepción para que falle el test si es necesario
-            }
+            await _serieUpdateService.VerificarYActualizarSeriesAsync();
 
             // Assert
-            // Ajustar la verificación para que coincida con la firma del método
             _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.TotalTemporadas == 2), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
             _notificacionServiceMock.Verify(n => n.CrearYEnviarNotificacionAsync(
                 001,
@@ -90,22 +84,24 @@ namespace SerializedStalker.Tests.Series
                 Titulo = "Test Serie",
                 TotalTemporadas = 1,
                 Temporadas = new List<Temporada>
+        {
+            new Temporada
+            {
+                NumeroTemporada = 1,
+                Episodios = new List<Episodio>
                 {
-                    new Temporada
-                    {
-                        NumeroTemporada = 1,
-                        Episodios = new List<Episodio>
-                        {
-                            new Episodio { NumeroEpisodio = 1, Titulo = "Episodio 1", FechaEstreno = DateOnly.FromDateTime(System.DateTime.Now) }
-                        }
-                    }
+                    new Episodio { NumeroEpisodio = 1, Titulo = "Episodio 1", FechaEstreno = DateOnly.FromDateTime(DateTime.Now) }
                 }
+            }
+        }
             };
+
             var seriesList = new List<Serie> { serie };
-            var apiSerie = new SerieDto { TotalTemporadas = 1 };
+            var apiSerie = new SerieDto { TotalTemporadas = 1, ImdbID = "tt123456" };
 
             _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(seriesList);
+
             _seriesApiServiceMock.Setup(s => s.BuscarSerieAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new[] { apiSerie });
 
@@ -113,11 +109,12 @@ namespace SerializedStalker.Tests.Series
             {
                 NumeroTemporada = 1,
                 Episodios = new List<EpisodioDto>
-                {
-                    new EpisodioDto { NumeroEpisodio = 1, Titulo = "Episodio 1", FechaEstreno = DateOnly.FromDateTime(System.DateTime.Now) },
-                    new EpisodioDto { NumeroEpisodio = 2, Titulo = "Nuevo Episodio 2", FechaEstreno = DateOnly.FromDateTime(System.DateTime.Now) }
-                }
+        {
+            new EpisodioDto { NumeroEpisodio = 1, Titulo = "Episodio 1", FechaEstreno = DateOnly.FromDateTime(DateTime.Now) },
+            new EpisodioDto { NumeroEpisodio = 2, Titulo = "Nuevo Episodio 2", FechaEstreno = DateOnly.FromDateTime(DateTime.Now) }
+        }
             };
+
             _seriesApiServiceMock.Setup(s => s.BuscarTemporadaAsync(It.IsAny<string>(), 1))
                 .ReturnsAsync(apiTemporada);
 
@@ -131,5 +128,37 @@ namespace SerializedStalker.Tests.Series
                 "Se han añadido 1 nuevos episodios en la serie Test Serie.",
                 TipoNotificacion.Email), Times.Once);
         }
+
+        [Fact]
+        public async Task Should_Persist_Series_If_Not_Exists()
+        {
+            // Arrange
+            var serieDto = new SerieDto
+            {
+                ImdbID = "tt123456",
+                Titulo = "Test Serie",
+                TotalTemporadas = 1,
+                Temporadas = new List<TemporadaDto>() // Asegúrate de inicializar la colección
+            };
+
+            var seriesList = new List<Serie>(); // La lista de series está vacía
+
+            _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(seriesList); // Devolvemos una lista vacía
+
+            // Act
+            await _serieUpdateService.PersistirSeriesAsync(new[] { serieDto });
+
+            // Assert
+            // Verificar que se inserte la nueva serie
+            _serieRepositoryMock.Verify(r => r.InsertAsync(
+                It.Is<Serie>(s => s.ImdbIdentificator == serieDto.ImdbID && s.Titulo == serieDto.Titulo),
+                false, // autoSave = false
+                It.IsAny<CancellationToken>()), // CancellationToken
+            Times.Once);
+        }
+
+
+
     }
 }
