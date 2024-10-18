@@ -17,6 +17,15 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using SerializedStalker.Series;
 using SerializedStalker.ListasDeSeguimiento;
 using SerializedStalker.Domain.Notificaciones;
+using System.Reflection.Emit;
+using Microsoft.Extensions.DependencyInjection;
+using Volo.Abp.Users;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Linq.Expressions;
+using System;
+using Volo.Abp.Auditing;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using SerializedStalker.Usuarios;
 
 namespace SerializedStalker.EntityFrameworkCore;
 
@@ -44,6 +53,9 @@ public class SerializedStalkerDbContext :
 
     //Notificación
     public DbSet<Notificacion> Notificaciones { get; set; }
+
+    //Manejo de Usuarios
+    private readonly CurrentUserService _currentUserService;
 
     #region Entities from the modules
 
@@ -73,16 +85,19 @@ public class SerializedStalkerDbContext :
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
 
     #endregion
-
+   
     public SerializedStalkerDbContext(DbContextOptions<SerializedStalkerDbContext> options)
         : base(options)
     {
-
+        _currentUserService = this.GetService<CurrentUserService>();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        //// Configuración del filtro global para CreatorId basado en el usuario actual
+        builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
 
         /* Include modules to your migration db context */
 
@@ -97,6 +112,8 @@ public class SerializedStalkerDbContext :
         builder.ConfigureBlobStoring();
 
         /* Configure your own tables/entities inside here */
+        //// Configuración del filtro global para CreatorId basado en el usuario actual
+        builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
         //Serie
         builder.Entity<Serie>(b =>
         {

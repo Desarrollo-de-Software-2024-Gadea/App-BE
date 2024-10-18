@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp.Auditing;
 using Volo.Abp.Domain.Entities;
 
 namespace SerializedStalker.Series
 {
-    public class Serie : AggregateRoot<int>
+    public class Serie : AggregateRoot<int>, IMustHaveCreator<Guid>
     {
         public string Titulo { get; set; }  
         public string Clasificacion { get; set; } 
@@ -27,6 +28,10 @@ namespace SerializedStalker.Series
         public string Tipo { get; set; } 
         public int TotalTemporadas { get; set; }
         public ICollection<Temporada> Temporadas { get; set; }
+
+        //Usuario
+        public Guid Creator { get; set; }
+        public Guid CreatorId { get; set; }
 
     }
 }

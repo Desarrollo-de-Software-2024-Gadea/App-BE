@@ -7,20 +7,28 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Users;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace SerializedStalker.ListasDeSeguimiento
 {
+    [Authorize]
     public class ListaDeSeguimientoAppService : ApplicationService, IListaDeSeguimientoAppService
     {
         private readonly IRepository<ListaDeSeguimiento,int> _listaDeSeguimientoRepository;
         private readonly IRepository<Serie, int> _serieRepository;
-        public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, IRepository<Serie, int> serieRepository)
+        private readonly ICurrentUser _currentUser;
+
+        public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, IRepository<Serie, int> serieRepository, ICurrentUser currentUser)
         { 
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
-            _serieRepository = serieRepository; 
+            _serieRepository = serieRepository;
+            _currentUser = currentUser;
         }
         public async Task AddSerieAsync(int serieID)
         {
+            Guid? userId = _currentUser.Id;
             // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
             var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault();
 
