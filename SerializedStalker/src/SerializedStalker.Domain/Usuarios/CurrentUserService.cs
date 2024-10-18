@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Volo.Abp.Users;
 namespace SerializedStalker.Usuarios
 {
-    public class CurrentUserService
+    public class CurrentUserService : ICurrentUserService
     {
         private readonly ICurrentUser _currentUser;
         public CurrentUserService(ICurrentUser currentUser)
