@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using SerializedStalker.Usuarios;
 
 namespace SerializedStalker.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ public class SerializedStalkerDbContextFactory : IDesignTimeDbContextFactory<Ser
         var builder = new DbContextOptionsBuilder<SerializedStalkerDbContext>()
             .UseSqlServer(configuration.GetConnectionString("Default"));
         
-        return new SerializedStalkerDbContext(builder.Options);
+        return new SerializedStalkerDbContext(builder.Options, new FakeCurrentUserService());
     }
 
     private static IConfigurationRoot BuildConfiguration()
