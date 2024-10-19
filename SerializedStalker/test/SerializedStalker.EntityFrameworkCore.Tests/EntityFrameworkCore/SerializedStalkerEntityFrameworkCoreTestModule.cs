@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using SerializedStalker.Usuarios;
 using Volo.Abp;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.Sqlite;
@@ -23,7 +24,7 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
     private SqliteConnection? _sqliteConnection;
 
     public override void ConfigureServices(ServiceConfigurationContext context)
-    {
+    {        
         Configure<FeatureManagementOptions>(options =>
         {
             options.SaveStaticFeaturesToDatabase = false;
@@ -67,7 +68,7 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
             .UseSqlite(connection)
             .Options;
 
-        using (var context = new SerializedStalkerDbContext(options))
+        using (var context = new SerializedStalkerDbContext(options, new FakeCurrentUserService()))
         {
             context.GetService<IRelationalDatabaseCreator>().CreateTables();
         }

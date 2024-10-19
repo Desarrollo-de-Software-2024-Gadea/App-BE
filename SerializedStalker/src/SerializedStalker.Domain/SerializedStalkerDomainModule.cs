@@ -17,6 +17,9 @@ using Volo.Abp.Emailing;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
 using Volo.Abp.TenantManagement;
+using SerializedStalker.Usuarios;
+using SerializedStalker.Series;
+
 
 namespace SerializedStalker;
 
@@ -64,7 +67,8 @@ public class SerializedStalkerDomainModule : AbpModule
             options.Languages.Add(new LanguageInfo("de-DE", "de-DE", "Deutsch"));
             options.Languages.Add(new LanguageInfo("es", "es", "Español"));
         });
-        
+
+        context.Services.AddTransient<ICurrentUserService,CurrentUserService>(); // Registrar el servicio        
 
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
