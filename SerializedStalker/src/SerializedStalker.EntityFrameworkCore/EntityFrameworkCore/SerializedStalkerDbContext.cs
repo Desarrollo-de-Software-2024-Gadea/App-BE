@@ -54,6 +54,10 @@ public class SerializedStalkerDbContext :
     //Notificación
     public DbSet<Notificacion> Notificaciones { get; set; }
 
+    //Calificacion
+    public DbSet<Calificacion> Calificaciones { get; set; }
+
+
     //Manejo de Usuarios
     private readonly ICurrentUserService _currentUserService;
 
@@ -210,6 +214,19 @@ public class SerializedStalkerDbContext :
             b.Property(x => x.Leida).IsRequired();
             b.Property(x => x.Tipo).IsRequired();
             b.Property(x => x.FechaCreacion).IsRequired();
+
+        });
+
+        //Califiacacion
+        builder.Entity<Calificacion>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Calificacion",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.calificacion).IsRequired();
+            b.Property(x => x.comentario);
+            b.Property(x => x.FechaCreacion).IsRequired();
+            b.Property(x => x.SerieID).IsRequired();
 
         });
         //builder.Entity<YourEntity>(b =>
