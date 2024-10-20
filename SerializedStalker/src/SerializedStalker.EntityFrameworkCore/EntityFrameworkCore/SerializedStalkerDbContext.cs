@@ -102,7 +102,7 @@ public class SerializedStalkerDbContext :
         base.OnModelCreating(builder);
 
         //// Configuración del filtro global para CreatorId basado en el usuario actual
-        builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
+   builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
 
         /* Include modules to your migration db context */
 
@@ -146,6 +146,12 @@ public class SerializedStalkerDbContext :
             b.HasMany(s => s.Temporadas)
              .WithOne(t => t.Serie)
              .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+            // Relación con Calificaciones
+            b.HasMany(s => s.Calificaciones)
+             .WithOne(c => c.Serie)
+             .HasForeignKey(c => c.SerieID)
              .OnDelete(DeleteBehavior.Cascade)
              .IsRequired();
         });
@@ -227,7 +233,7 @@ public class SerializedStalkerDbContext :
             b.Property(x => x.comentario);
             b.Property(x => x.FechaCreacion).IsRequired();
             b.Property(x => x.SerieID).IsRequired();
-
+            b.Property(x => x.UsuarioId).IsRequired(); // Configura la propiedad UsuarioId como requerida
         });
         //builder.Entity<YourEntity>(b =>
         //{

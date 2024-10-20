@@ -33,5 +33,14 @@ namespace SerializedStalker.Series
         public Guid Creator { get; set; }
         public Guid CreatorId { get; set; }
 
+        //Manejo de Calificaciones
+        public ICollection<Calificacion> Calificaciones { get; set; }
+
+        public Serie()
+        {
+            Calificaciones = new List<Calificacion>();
+        }
+
     }
 }
+

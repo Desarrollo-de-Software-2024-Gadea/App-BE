@@ -36,6 +36,15 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
             options.IsDynamicPermissionStoreEnabled = false;
         });
         context.Services.AddAlwaysDisableUnitOfWorkTransaction();
+        //Agregado para solucioner problemas con las pruebas 
+        //Quizas convenga agregarle autorización a las pruebas en si
+        Configure<AbpUnitOfWorkOptions>(options =>
+        {
+            options.IsTransactional = false; // Deshabilitar transacciones para pruebas
+        });
+
+        // Mockear servicios si es necesario
+        context.Services.AddAlwaysAllowAuthorization();
 
         ConfigureInMemorySqlite(context.Services);
 
