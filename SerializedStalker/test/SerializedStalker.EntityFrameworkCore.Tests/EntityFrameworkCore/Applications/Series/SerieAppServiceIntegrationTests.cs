@@ -12,7 +12,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Testing;
 using Xunit;
 
-public class SerieAppServiceIntegrationTests : AbpIntegratedTest<SerializedStalkerApplicationTestModule>
+public abstract class SerieAppServiceIntegrationTests<TStartupModule> : SerializedStalkerApplicationTestBase<TStartupModule> where TStartupModule : IAbpModule
 {
     private readonly ISerieAppService _serieAppService;
     private readonly ICurrentUserService _currentUserService;
