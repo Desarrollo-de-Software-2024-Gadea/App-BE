@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 
 namespace SerializedStalker.Series
@@ -39,30 +40,47 @@ namespace SerializedStalker.Series
 
         public async Task CalificarSerieAsync(CalificacionDto input)
         {
+            // Obtener la serie del repositorio
             var serie = await _serieRepository.GetAsync(input.SerieID);
+            if (serie == null)
+            {
+                throw new EntityNotFoundException(typeof(Serie), input.SerieID);
+            }
+
+            // Obtener el ID del usuario actual
             var userIdActual = _currentUserService.GetCurrentUserId();
-            //Un usuario solo puede calificar las series relacionadas a él
-            if (serie.CreatorId != userIdActual)
+            if (!userIdActual.HasValue)
+            {
+                throw new InvalidOperationException("User ID cannot be null");
+            }
+
+            // Un usuario solo puede calificar las series relacionadas a él
+            if (serie.CreatorId != userIdActual.Value)
             {
                 throw new UnauthorizedAccessException("No puedes calificar esta serie.");
             }
 
-            //Un usuario no puede calificar 2 veces la misma serie
-            var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.UsuarioId == userIdActual);
+            // Un usuario no puede calificar 2 veces la misma serie
+            var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.UsuarioId == userIdActual.Value);
             if (calificacionExistente != null)
             {
                 throw new InvalidOperationException("Ya has calificado esta serie.");
             }
 
+            // Crear la nueva calificación
             var calificacion = new Calificacion
             {
                 calificacion = input.calificacion,
                 comentario = input.comentario,
-                FechaCreacion = input.FechaCreacion,
+                FechaCreacion = DateTime.Now, // Asegúrate de asignar la fecha de creación
                 SerieID = input.SerieID,
                 UsuarioId = userIdActual.Value // Asigna el ID del usuario actual
             };
+
+            // Agregar la calificación a la serie
             serie.Calificaciones.Add(calificacion);
+
+            // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
     }

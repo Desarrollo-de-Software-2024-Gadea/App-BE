@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SerializedStalker;
 using SerializedStalker.EntityFrameworkCore;
 using SerializedStalker.Series;
 using SerializedStalker.Usuarios;
+using Volo.Abp.Data;
 using Volo.Abp.Modularity;
 using Volo.Abp.Testing;
 using Xunit;
@@ -16,6 +18,8 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
 {
     private readonly ISerieAppService _serieAppService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger<SerieAppServiceIntegrationTests<TStartupModule>> _logger;
+    private readonly IDataSeedContributor _testDataSeedContributor;
 
     public SerieAppServiceIntegrationTests()
     {
@@ -25,7 +29,11 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
         var currentUserServiceMock = new Mock<ICurrentUserService>();
         currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(Guid.NewGuid());
         _currentUserService = currentUserServiceMock.Object;
+
+        _logger = GetRequiredService<ILogger<SerieAppServiceIntegrationTests<TStartupModule>>>();
+        _testDataSeedContributor = GetRequiredService<IDataSeedContributor>();
     }
+
     [Fact]
     public async Task CalificarSerieAsync_ShouldAddCalificacion_WhenUserHasNotRated()
     {
@@ -36,25 +44,19 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
             throw new InvalidOperationException("User ID cannot be null");
         }
 
-        var serieId = 1;
-
-        // Crear una serie en la base de datos
-        await UsingDbContextAsync(async context =>
+        // Obtener la serie de prueba creada en SerializedStalkerTestDataSeedContributor
+        var serie = await UsingDbContextAsync(async context =>
         {
-            var serie = new Serie
-            {
-                CreatorId = userId.Value,
-                Titulo = "Test Serie",
-                Calificaciones = new List<Calificacion>()
-            };
-            await context.Series.AddAsync(serie);
-            await context.SaveChangesAsync();
-            serieId = serie.Id; // Obtener el Id generado
+            var serie = await context.Series.FirstOrDefaultAsync(s => s.Titulo == "Test Serie");
+            _logger.LogInformation("Serie obtenida: {SerieId}", serie?.Id);
+            return serie;
         });
+
+        Assert.NotNull(serie);
 
         var calificacionDto = new CalificacionDto
         {
-            SerieID = serieId,
+            SerieID = serie.Id,
             calificacion = 5,
             comentario = "Last thing you will ever watch."
         };
@@ -63,8 +65,8 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
         await _serieAppService.CalificarSerieAsync(calificacionDto);
 
         // Assert
-        var serie = await UsingDbContextAsync(async context => await context.Series.Include(s => s.Calificaciones).FirstOrDefaultAsync(s => s.Id == serieId));
-        Assert.Single(serie!.Calificaciones);
+        var serieConCalificaciones = await UsingDbContextAsync(async context => await context.Series.Include(s => s.Calificaciones).FirstOrDefaultAsync(s => s.Id == serie.Id));
+        Assert.Single(serieConCalificaciones!.Calificaciones);
     }
 
     private async Task UsingDbContextAsync(Func<SerializedStalkerDbContext, Task> action)
@@ -88,6 +90,9 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
     [Fact]
     public async Task CalificarSerieAsync_ShouldThrowException_WhenUserAlreadyRated()
     {
+        // Seed data
+        await _testDataSeedContributor.SeedAsync(new DataSeedContext());
+
         // Arrange
         var userId = _currentUserService.GetCurrentUserId();
         if (!userId.HasValue)
@@ -95,59 +100,31 @@ public abstract class SerieAppServiceIntegrationTests<TStartupModule> : Serializ
             throw new InvalidOperationException("User ID cannot be null");
         }
 
-        var serieId = 1;
+        // Obtener la serie de prueba creada en SerializedStalkerTestDataSeedContributor
+        var serie = await UsingDbContextAsync(async context =>
+        {
+            var serie = await context.Series.FirstOrDefaultAsync(s => s.Titulo == "Test Serie");
+            _logger.LogInformation("Serie obtenida: {SerieId}", serie?.Id);
+            return serie;
+        });
 
-        // Crear una serie en la base de datos con una calificación existente
+        Assert.NotNull(serie);
+
+        // Agregar una calificación existente
         await UsingDbContextAsync(async context =>
         {
-            var serie = new Serie
-            {
-                CreatorId = userId.Value,
-                Titulo = "Test Serie",
-                Calificaciones = new List<Calificacion>
-                {
-                    new Calificacion { UsuarioId = userId.Value, calificacion = 5, comentario = "Great series!" }
-                }
-            };
-            await context.Series.AddAsync(serie);
+            serie.Calificaciones.Add(new Calificacion { UsuarioId = userId.Value, calificacion = 5, comentario = "Great series!" });
             await context.SaveChangesAsync();
-            serieId = serie.Id; // Obtener el Id generado
         });
 
         var calificacionDto = new CalificacionDto
         {
-            SerieID = serieId,
+            SerieID = serie.Id,
             calificacion = 5,
-            comentario = "Another great series!"
+            comentario = "Lorem ipsum!"
         };
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.CalificarSerieAsync(calificacionDto));
     }
 }
-
-
-/*
-using Moq;
-using SerializedStalker.Usuarios;
-using Volo.Abp.DependencyInjection;
-
-public class SerieAppServiceIntegrationTests : AbpIntegratedTest<SerializedStalkerApplicationTestModule>
-{
-    private readonly ISerieAppService _serieAppService;
-    private readonly ICurrentUserService _currentUserService;
-
-    public SerieAppServiceIntegrationTests()
-    {
-        _serieAppService = GetRequiredService<ISerieAppService>();
-
-        // Mockear ICurrentUserService
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-        currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(Guid.NewGuid());
-        _currentUserService = currentUserServiceMock.Object;
-    }
-
-    // Resto del código de prueba...
-}
-
-*/
