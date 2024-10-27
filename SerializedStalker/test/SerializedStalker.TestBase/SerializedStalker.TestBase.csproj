@@ -42,4 +42,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SerializedStalker.Domain\SerializedStalker.Domain.csproj" />
+    <ProjectReference Include="..\..\src\SerializedStalker.EntityFrameworkCore\SerializedStalker.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
 </Project>

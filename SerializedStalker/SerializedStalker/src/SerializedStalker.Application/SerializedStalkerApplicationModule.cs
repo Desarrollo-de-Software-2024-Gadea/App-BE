@@ -22,8 +22,6 @@ namespace SerializedStalker
 
             // Registrar el worker como un IHostedService
             context.Services.AddHostedService<SerieUpdateChecker>();
-
-            context.Services.AddTransient<ISeriesApiService, OmdbService>();
         }
     }
 }
