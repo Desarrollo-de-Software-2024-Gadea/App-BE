@@ -28,8 +28,5 @@ namespace SerializedStalker.Series
         public int TotalTemporadas { get; set; }
 
         public ICollection<TemporadaDto> Temporadas { get; set; }
-
-        // Manejo de Calificaciones
-        public ICollection<CalificacionDto> Calificaciones { get; set; }
     }
 }
