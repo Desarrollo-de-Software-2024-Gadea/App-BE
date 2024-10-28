@@ -5,6 +5,8 @@ using Volo.Abp.Domain.Services;
 using SerializedStalker.Series;
 using SerializedStalker.Notificaciones;
 using System.Collections.Generic;
+using Volo.Abp.Users;
+using System;
 
 namespace SerializedStalker.Series
 {
@@ -13,21 +15,25 @@ namespace SerializedStalker.Series
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly INotificacionService _notificacionService;
+        private readonly ICurrentUser _currentUser;
 
         public SerieUpdateService(
             ISeriesApiService seriesApiService,
             IRepository<Serie, int> serieRepository,
+            ICurrentUser currentUser,
             INotificacionService notificacionService) // Inyección del servicio de notificaciones
         {
             _seriesApiService = seriesApiService;
             _serieRepository = serieRepository;
+            _currentUser = currentUser;
             _notificacionService = notificacionService; // Asignación del servicio
         }
 
         public async Task VerificarYActualizarSeriesAsync()
         {
             var series = await _serieRepository.GetListAsync();
-
+            var userEnt = _currentUser;
+            Guid userId = (Guid)_currentUser.Id;
             foreach (var serie in series)
             {
                 var apiSeries = await _seriesApiService.BuscarSerieAsync(serie.Titulo, serie.Generos);
@@ -37,7 +43,7 @@ namespace SerializedStalker.Series
                     var apiSerie = apiSeries.FirstOrDefault();
 
                     // Persistir la serie en la base de datos si es nueva o necesita actualizarse
-                    await PersistirSeriesAsync(new[] { apiSerie });
+                    await PersistirSeriesAsync(new[] { apiSerie }, userEnt, userId);
 
                     // Si la serie tiene más temporadas, se agrega la nueva temporada
                     if (apiSerie.TotalTemporadas > serie.TotalTemporadas)
@@ -141,7 +147,7 @@ namespace SerializedStalker.Series
         }
 
         // Nuevo método para persistir las series en la base de datos
-        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+        public async Task PersistirSeriesAsync(SerieDto[] seriesDto, Guid userId)
         {
             var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series
 
@@ -174,7 +180,8 @@ namespace SerializedStalker.Series
                         ImdbIdentificator = serieDto.ImdbID,
                         Tipo = serieDto.Tipo,
                         TotalTemporadas = serieDto.TotalTemporadas,
-                        Temporadas = new List<Temporada>() // Asegúrate de inicializar la colección
+                        Temporadas = new List<Temporada>(), // Asegúrate de inicializar la colección
+                        CreatorId = userId
                     };
 
                     // Asegúrate de que Temporadas no sea null
