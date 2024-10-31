@@ -7,9 +7,13 @@ using SerializedStalker.Notificaciones;
 using System.Collections.Generic;
 using Volo.Abp.Users;
 using System;
+using AutoMapper.Internal.Mappers;
+using Volo.Abp.ObjectMapping;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SerializedStalker.Series
 {
+    [Authorize]
     public class SerieUpdateService : DomainService, ISerieUpdateService // Implementa la interfaz
     {
         private readonly ISeriesApiService _seriesApiService;
@@ -32,8 +36,6 @@ namespace SerializedStalker.Series
         public async Task VerificarYActualizarSeriesAsync()
         {
             var series = await _serieRepository.GetListAsync();
-            var userEnt = _currentUser;
-            Guid userId = (Guid)_currentUser.Id;
             foreach (var serie in series)
             {
                 var apiSeries = await _seriesApiService.BuscarSerieAsync(serie.Titulo, serie.Generos);
@@ -43,16 +45,18 @@ namespace SerializedStalker.Series
                     var apiSerie = apiSeries.FirstOrDefault();
 
                     // Persistir la serie en la base de datos si es nueva o necesita actualizarse
-                    await PersistirSeriesAsync(new[] { apiSerie }, userEnt, userId);
+                    //await PersistirSeriesAsync(new[] { apiSerie }); No tiene sentido llamar esto, la series checkeadas deben esta ya persistidas, solo debemos actualizar
 
                     // Si la serie tiene más temporadas, se agrega la nueva temporada
                     if (apiSerie.TotalTemporadas > serie.TotalTemporadas)
                     {
                         var nuevaTemporadaNumero = serie.TotalTemporadas + 1;
-                        var nuevaTemporadaApi = await _seriesApiService.BuscarTemporadaAsync(apiSerie.ImdbID, nuevaTemporadaNumero);
+                        var nuevaTemporadaApi = await _seriesApiService.BuscarTemporadaAsync(apiSerie.ImdbIdentificator, nuevaTemporadaNumero);
 
                         if (nuevaTemporadaApi != null)
                         {
+                            //var nuevaTemporada = ObjectMapper.Map<TemporadaDto, Temporada>(nuevaTemporadaApi);
+                            //ObjectMapper no funciona, por alguna razón
                             var nuevaTemporada = new Temporada
                             {
                                 NumeroTemporada = nuevaTemporadaNumero,
@@ -88,7 +92,7 @@ namespace SerializedStalker.Series
                     if (ultimaTemporadaLocal != null)
                     {
                         // Obtener la última temporada desde la API
-                        var apiUltimaTemporada = await _seriesApiService.BuscarTemporadaAsync(apiSerie.ImdbID, ultimaTemporadaLocal.NumeroTemporada);
+                        var apiUltimaTemporada = await _seriesApiService.BuscarTemporadaAsync(apiSerie.ImdbIdentificator, ultimaTemporadaLocal.NumeroTemporada);
 
                         if (apiUltimaTemporada != null)
                         {
@@ -106,6 +110,7 @@ namespace SerializedStalker.Series
                                     // Lógica para manejar los episodios nuevos
                                     foreach (var episodioNuevo in episodiosNuevos)
                                     {
+                                        //var nuevoEpisodio = ObjectMapper.Map<EpisodioDto, Episodio>(episodioNuevo);
                                         var nuevoEpisodio = new Episodio
                                         {
                                             Titulo = episodioNuevo.Titulo,
@@ -142,77 +147,6 @@ namespace SerializedStalker.Series
                             }
                         }
                     }
-                }
-            }
-        }
-
-        // Nuevo método para persistir las series en la base de datos
-        public async Task PersistirSeriesAsync(SerieDto[] seriesDto, Guid userId)
-        {
-            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series
-
-            foreach (var serieDto in seriesDto)
-            {
-                // Comprobación para evitar excepciones al acceder a propiedades de un objeto que podría ser null
-                if (serieDto == null) continue; // Salta si serieDto es null
-
-                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbID);
-
-                if (serieExistente == null)
-                {
-                    // Crear nueva serie
-                    var nuevaSerie = new Serie
-                    {
-                        Titulo = serieDto.Titulo,
-                        Clasificacion = serieDto.Clasificacion,
-                        FechaEstreno = serieDto.FechaEstreno,
-                        Duracion = serieDto.Duracion,
-                        Generos = serieDto.Generos,
-                        Directores = serieDto.Directores,
-                        Escritores = serieDto.Escritores,
-                        Actores = serieDto.Actores,
-                        Sinopsis = serieDto.Sinopsis,
-                        Idiomas = serieDto.Idiomas,
-                        Pais = serieDto.Pais,
-                        Poster = serieDto.Poster,
-                        ImdbPuntuacion = serieDto.ImdbPuntuacion,
-                        ImdbVotos = serieDto.ImdbVotos,
-                        ImdbIdentificator = serieDto.ImdbID,
-                        Tipo = serieDto.Tipo,
-                        TotalTemporadas = serieDto.TotalTemporadas,
-                        Temporadas = new List<Temporada>(), // Asegúrate de inicializar la colección
-                        CreatorId = userId
-                    };
-
-                    // Asegúrate de que Temporadas no sea null
-                    if (serieDto.Temporadas != null)
-                    {
-                        foreach (var temporadaDto in serieDto.Temporadas)
-                        {
-                            var nuevaTemporada = new Temporada
-                            {
-                                NumeroTemporada = temporadaDto.NumeroTemporada,
-                                Titulo = temporadaDto.Titulo,
-                                FechaLanzamiento = temporadaDto.FechaLanzamiento,
-                                Episodios = temporadaDto.Episodios.Select(e => new Episodio
-                                {
-                                    NumeroEpisodio = e.NumeroEpisodio,
-                                    Titulo = e.Titulo,
-                                    FechaEstreno = e.FechaEstreno
-                                }).ToList()
-                            };
-                            nuevaSerie.Temporadas.Add(nuevaTemporada);
-                        }
-                    }
-
-                    // Persistir la nueva serie en la base de datos
-                    await _serieRepository.InsertAsync(nuevaSerie);
-                }
-                else
-                {
-                    // Actualizar la serie existente con nueva información
-                    serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
-                    await _serieRepository.UpdateAsync(serieExistente);
                 }
             }
         }

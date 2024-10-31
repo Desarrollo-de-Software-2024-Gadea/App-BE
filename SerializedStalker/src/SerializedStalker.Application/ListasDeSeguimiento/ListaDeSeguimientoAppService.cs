@@ -48,7 +48,7 @@ namespace SerializedStalker.ListasDeSeguimiento
             //var serie = await _serieRepository.GetAsync(serieID);
 
             // Comprueba si la serie ya está en la lista
-            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieApi.FirstOrDefault().ImdbID))
+            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieApi.FirstOrDefault().ImdbIdentificator))
             {
                 await _serieUpService.PersistirSeriesAsync(serieApi, userId);
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();

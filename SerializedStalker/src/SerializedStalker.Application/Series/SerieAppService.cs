@@ -83,5 +83,57 @@ namespace SerializedStalker.Series
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
+        // Nuevo método para persistir las series en la base de datos
+        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+        {
+            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series
+
+            foreach (var serieDto in seriesDto)
+            {
+                // Comprobación para evitar excepciones al acceder a propiedades de un objeto que podría ser null
+                if (serieDto == null) continue; // Salta si serieDto es null
+                // **PROBLEMA, UTILIZAR EL IMBID NO ES LA IDEA CORRECTA
+                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator);
+
+                if (serieExistente == null)
+                {
+                    // Crear nueva serie                 
+                    // Utilizar mappers nuevaSerie
+
+                    var nuevaSerie = ObjectMapper.Map<SerieDto, Serie>(serieDto);
+
+                    // Asegúrate de que Temporadas no sea null
+                    if (serieDto.Temporadas != null)
+                    {
+                        foreach (var temporadaDto in serieDto.Temporadas)
+                        {
+                            var nuevaTemporada = ObjectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                            /*var nuevaTemporada = new Temporada
+                            {
+                                NumeroTemporada = temporadaDto.NumeroTemporada,
+                                Titulo = temporadaDto.Titulo,
+                                FechaLanzamiento = temporadaDto.FechaLanzamiento,
+                                Episodios = temporadaDto.Episodios.Select(e => new Episodio
+                                {
+                                    NumeroEpisodio = e.NumeroEpisodio,
+                                    Titulo = e.Titulo,
+                                    FechaEstreno = e.FechaEstreno
+                                }).ToList()
+                            };*/
+                            nuevaSerie.Temporadas.Add(nuevaTemporada);
+                        }
+                    }
+
+                    // Persistir la nueva serie en la base de datos
+                    await _serieRepository.InsertAsync(nuevaSerie);
+                }
+                else
+                {
+                    // Actualizar la serie existente con nueva información????
+                    serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+                    await _serieRepository.UpdateAsync(serieExistente);
+                }
+            }
+        }
     }
 }
