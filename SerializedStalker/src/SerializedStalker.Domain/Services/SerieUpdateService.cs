@@ -19,17 +19,14 @@ namespace SerializedStalker.Series
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly INotificacionService _notificacionService;
-        private readonly ICurrentUser _currentUser;
 
         public SerieUpdateService(
             ISeriesApiService seriesApiService,
             IRepository<Serie, int> serieRepository,
-            ICurrentUser currentUser,
             INotificacionService notificacionService) // Inyección del servicio de notificaciones
         {
             _seriesApiService = seriesApiService;
             _serieRepository = serieRepository;
-            _currentUser = currentUser;
             _notificacionService = notificacionService; // Asignación del servicio
         }
 

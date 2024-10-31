@@ -20,7 +20,7 @@ namespace SerializedStalker.ListasDeSeguimiento
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUser _currentUser;
         private readonly OmdbService _service;
-        private readonly SerieUpdateService _serieUpService;
+        private readonly SerieAppService _serieAppService;
 
         public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, IRepository<Serie, int> serieRepository, ICurrentUser currentUser)
         { 
@@ -50,7 +50,7 @@ namespace SerializedStalker.ListasDeSeguimiento
             // Comprueba si la serie ya está en la lista
             if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieApi.FirstOrDefault().ImdbIdentificator))
             {
-                await _serieUpService.PersistirSeriesAsync(serieApi, userId);
+                await _serieAppService.PersistirSeriesAsync(serieApi);
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
                 listaDeSeguimiento.Series.Add(serie); // Añade la serie a la lista
             }
