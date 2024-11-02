@@ -9,6 +9,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Users;
 
 namespace SerializedStalker.Series
 {
@@ -88,12 +89,17 @@ namespace SerializedStalker.Series
         {
             var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series
 
+            if (seriesExistentes == null)
+            {
+                seriesExistentes = new List<Serie>();
+            }
+
             foreach (var serieDto in seriesDto)
             {
                 // Comprobación para evitar excepciones al acceder a propiedades de un objeto que podría ser null
                 if (serieDto == null) continue; // Salta si serieDto es null
-                // **PROBLEMA, UTILIZAR EL IMBID NO ES LA IDEA CORRECTA
-                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator);
+                var userIdActual = _currentUserService.GetCurrentUserId();
+                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual);
 
                 if (serieExistente == null)
                 {
@@ -129,7 +135,7 @@ namespace SerializedStalker.Series
                 }
                 else
                 {
-                    // Actualizar la serie existente con nueva información????
+                    // Actualizar la serie existente con nueva información
                     serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
                     await _serieRepository.UpdateAsync(serieExistente);
                 }
