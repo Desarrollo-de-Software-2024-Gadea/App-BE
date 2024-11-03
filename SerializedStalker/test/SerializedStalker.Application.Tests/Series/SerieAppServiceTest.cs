@@ -11,13 +11,16 @@ using SerializedStalker.Usuarios;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Xunit;
+using Volo.Abp.ObjectMapping;
+using Autofac.Core;
+
 
 public class SerieAppServiceTests
 {
     private readonly Mock<IRepository<Serie, int>> _serieRepositoryMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<ISeriesApiService> _seriesApiServiceMock;
-    private readonly IMapper _objectMapper;
+    private readonly Mock<IObjectMapper> _objectMapper;
     private readonly TestableSerieAppService _serieAppService;
 
     public SerieAppServiceTests()
@@ -25,20 +28,21 @@ public class SerieAppServiceTests
         _serieRepositoryMock = new Mock<IRepository<Serie, int>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _seriesApiServiceMock = new Mock<ISeriesApiService>();
+        _objectMapper = new Mock<IObjectMapper>();
 
-        var config = new MapperConfiguration(cfg =>
+      /*  var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<SerieDto, Serie>();
             cfg.CreateMap<TemporadaDto, Temporada>();
-        });
+        });*/
 
-        _objectMapper = config.CreateMapper();
+        //   _objectMapper = config.CreateMapper();
 
         _serieAppService = new TestableSerieAppService(
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
             _currentUserServiceMock.Object,
-            _objectMapper
+            _objectMapper.Object
         );
     }
 
@@ -107,26 +111,46 @@ public class SerieAppServiceTests
     {
         // Arrange
         Guid userId = Guid.NewGuid(); // Asumiendo que el ID del usuario es un entero
+        var serieId = 1;
+        var serieDto = new SerieDto
+        {
+            ImdbIdentificator = "tt1234567",
+            TotalTemporadas =3
+        };
+
+        var serieExistente = new Serie
+        {
+            ImdbIdentificator = "tt1234567",
+            //CreatorId = userId,
+            TotalTemporadas = 2
+        };
+
+        // _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<Serie> { serieExistente });
+        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serieExistente);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
+        //Parece que el test no obtiene los datos hechos con el Mock
+    }
+    [Fact]
+    public async Task PersistirSeriesAsync_ShouldAdd_New_Serie()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid(); // Asumiendo que el ID del usuario es un entero
         var serieDto = new SerieDto
         {
             ImdbIdentificator = "tt1234567",
             TotalTemporadas = 3
         };
 
-        var serieExistente = new Serie
-        {
-            ImdbIdentificator = "tt1234567",
-            CreatorId = userId,
-            TotalTemporadas = 2
-        };
-
-        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Serie> { serieExistente });
-
         _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
+        // Act
+        await _serieAppService.PersistirSeriesAsync(new[] {serieDto });
+
+        // Assert
+        _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567"), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
 
@@ -137,17 +161,17 @@ public class TestableSerieAppService : SerieAppService
         IRepository<Serie, int> serieRepository,
         ISeriesApiService seriesApiService,
         ICurrentUserService currentUserService,
-        IMapper objectMapper)
+        IObjectMapper objectMapper)
         : base(serieRepository, seriesApiService, currentUserService)
     {
-        SetObjectMapper(objectMapper);
+      //  SetObjectMapper(objectMapper);
     }
 
-    protected void SetObjectMapper(IMapper objectMapper)
+    /*protected void SetObjectMapper(IMapper objectMapper)
     {
         typeof(ApplicationService).GetProperty("ObjectMapper", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .SetValue(this, objectMapper);
-    }
+    }*/
 }
 
 

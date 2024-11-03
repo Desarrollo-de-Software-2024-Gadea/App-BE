@@ -87,7 +87,7 @@ namespace SerializedStalker.Series
         // Nuevo método para persistir las series en la base de datos
         public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
         {
-            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series
+            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series //No esta devolviendo GetListAsync nada
 
             if (seriesExistentes == null)
             {
@@ -105,7 +105,6 @@ namespace SerializedStalker.Series
                 {
                     // Crear nueva serie                 
                     // Utilizar mappers nuevaSerie
-
                     var nuevaSerie = ObjectMapper.Map<SerieDto, Serie>(serieDto);
 
                     // Asegúrate de que Temporadas no sea null

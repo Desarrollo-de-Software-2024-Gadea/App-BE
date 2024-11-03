@@ -7,7 +7,6 @@ using SerializedStalker.Notificaciones;
 using System.Collections.Generic;
 using Volo.Abp.Users;
 using System;
-using AutoMapper.Internal.Mappers;
 using Volo.Abp.ObjectMapping;
 using Microsoft.AspNetCore.Authorization;
 
@@ -19,15 +18,19 @@ namespace SerializedStalker.Series
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly INotificacionService _notificacionService;
+        private readonly IObjectMapper _objectMapper;
 
         public SerieUpdateService(
             ISeriesApiService seriesApiService,
             IRepository<Serie, int> serieRepository,
-            INotificacionService notificacionService) // Inyección del servicio de notificaciones
+            INotificacionService notificacionService,
+            IObjectMapper objectMap) // Inyección del servicio de notificaciones
+
         {
             _seriesApiService = seriesApiService;
             _serieRepository = serieRepository;
-            _notificacionService = notificacionService; // Asignación del servicio
+            _notificacionService = notificacionService;// Asignación del servicio
+            _objectMapper = objectMap;
         }
 
         public async Task VerificarYActualizarSeriesAsync()
@@ -52,8 +55,8 @@ namespace SerializedStalker.Series
 
                         if (nuevaTemporadaApi != null)
                         {
-                            //var nuevaTemporada = ObjectMapper.Map<TemporadaDto, Temporada>(nuevaTemporadaApi);
-                            //ObjectMapper no funciona, por alguna razón
+                            //var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(nuevaTemporadaApi);
+                            //ObjectMapper causa error en el test
                             var nuevaTemporada = new Temporada
                             {
                                 NumeroTemporada = nuevaTemporadaNumero,
@@ -107,14 +110,14 @@ namespace SerializedStalker.Series
                                     // Lógica para manejar los episodios nuevos
                                     foreach (var episodioNuevo in episodiosNuevos)
                                     {
-                                        //var nuevoEpisodio = ObjectMapper.Map<EpisodioDto, Episodio>(episodioNuevo);
-                                        var nuevoEpisodio = new Episodio
+                                        var nuevoEpisodio = _objectMapper.Map<EpisodioDto, Episodio>(episodioNuevo);
+                                        /*var nuevoEpisodio = new Episodio
                                         {
                                             Titulo = episodioNuevo.Titulo,
                                             NumeroEpisodio = episodioNuevo.NumeroEpisodio,
                                             FechaEstreno = episodioNuevo.FechaEstreno,
                                             TemporadaID = ultimaTemporadaLocal.Id
-                                        };
+                                        };*/
 
                                         // Agregar a la colección de episodios de la temporada local
                                         ultimaTemporadaLocal.Episodios.Add(nuevoEpisodio);
