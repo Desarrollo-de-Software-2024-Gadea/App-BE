@@ -10,6 +10,8 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
+using Volo.Abp.ObjectMapping;
+
 
 namespace SerializedStalker.Series
 {
@@ -19,13 +21,16 @@ namespace SerializedStalker.Series
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IObjectMapper _objectMapper;
 
-        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService)
+
+        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService, IObjectMapper objectMapper)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _currentUserService = currentUserService;
+            _objectMapper = objectMapper;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
@@ -105,14 +110,14 @@ namespace SerializedStalker.Series
                 {
                     // Crear nueva serie                 
                     // Utilizar mappers nuevaSerie
-                    var nuevaSerie = ObjectMapper.Map<SerieDto, Serie>(serieDto);
+                    var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
 
                     // Asegúrate de que Temporadas no sea null
                     if (serieDto.Temporadas != null)
                     {
                         foreach (var temporadaDto in serieDto.Temporadas)
                         {
-                            var nuevaTemporada = ObjectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                            var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
                             /*var nuevaTemporada = new Temporada
                             {
                                 NumeroTemporada = temporadaDto.NumeroTemporada,

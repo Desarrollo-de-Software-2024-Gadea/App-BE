@@ -162,7 +162,7 @@ public class TestableSerieAppService : SerieAppService
         ISeriesApiService seriesApiService,
         ICurrentUserService currentUserService,
         IObjectMapper objectMapper)
-        : base(serieRepository, seriesApiService, currentUserService)
+        : base(serieRepository, seriesApiService, currentUserService, objectMapper)
     {
       //  SetObjectMapper(objectMapper);
     }
