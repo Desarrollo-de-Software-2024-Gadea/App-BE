@@ -9,6 +9,6 @@ namespace SerializedStalker.ListasDeSeguimiento
 {
     public interface IListaDeSeguimientoAppService : IApplicationService
     {
-        Task AddSerieAsync(int SerieID); 
+        Task AddSerieAsync(string titulo); 
     }
 }

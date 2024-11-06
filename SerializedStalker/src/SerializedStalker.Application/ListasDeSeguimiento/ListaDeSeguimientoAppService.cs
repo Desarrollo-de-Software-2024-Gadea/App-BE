@@ -19,6 +19,8 @@ namespace SerializedStalker.ListasDeSeguimiento
         private readonly IRepository<ListaDeSeguimiento,int> _listaDeSeguimientoRepository;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUser _currentUser;
+        private readonly OmdbService _service;
+        private readonly SerieAppService _serieAppService;
 
         public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, IRepository<Serie, int> serieRepository, ICurrentUser currentUser)
         { 
@@ -26,9 +28,10 @@ namespace SerializedStalker.ListasDeSeguimiento
             _serieRepository = serieRepository;
             _currentUser = currentUser;
         }
-        public async Task AddSerieAsync(int serieID)
+        public async Task AddSerieAsync(string titulo) //int serieID
         {
-            Guid? userId = _currentUser.Id;
+            //var userEnt = _currentUser;
+            Guid userId = (Guid)_currentUser.Id;
             // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
             var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault();
 
@@ -39,12 +42,16 @@ namespace SerializedStalker.ListasDeSeguimiento
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
             }
 
+            //Obtenemos el serieDto
+            var serieApi = await _service.BuscarSerieAsync(titulo, null);
             // Busca la serie por ID
-            var serie = await _serieRepository.GetAsync(serieID);
+            //var serie = await _serieRepository.GetAsync(serieID);
 
             // Comprueba si la serie ya está en la lista
-            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serie.ImdbIdentificator))
+            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieApi.FirstOrDefault().ImdbIdentificator))
             {
+                await _serieAppService.PersistirSeriesAsync(serieApi);
+                var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
                 listaDeSeguimiento.Series.Add(serie); // Añade la serie a la lista
             }
             else
@@ -58,3 +65,9 @@ namespace SerializedStalker.ListasDeSeguimiento
 
     }
 }
+
+/*
+Como la idea del profe es que las series se persistan por separado, 
+debemos buscar la serie en la api y ahí persistirla, para luego agregarla a la lista de seguimiento.
+Debemos tambien tener en cuenta el usuario que la agrega a su lista así lo ponemos en la serie.
+*/

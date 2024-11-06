@@ -22,7 +22,7 @@ namespace SerializedStalker.Series
             public string Poster { get; set; }
             public string ImdbPuntuacion { get; set; }
             public int ImdbVotos { get; set; }
-            public string ImdbID { get; set; }
+            public string ImdbIdentificator { get; set; }
             public string Tipo { get; set; }
             public int TotalTemporadas { get; set; }
     }
