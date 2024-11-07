@@ -13,6 +13,7 @@ using Volo.Abp.Domain.Repositories;
 using Xunit;
 using Volo.Abp.ObjectMapping;
 using Autofac.Core;
+using System.Linq;
 
 
 public class SerieAppServiceTests
@@ -133,24 +134,41 @@ public class SerieAppServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
         //Parece que el test no obtiene los datos hechos con el Mock
     }
+
     [Fact]
     public async Task PersistirSeriesAsync_ShouldAdd_New_Serie()
     {
         // Arrange
-        Guid userId = Guid.NewGuid(); // Asumiendo que el ID del usuario es un entero
+        Guid userId = Guid.NewGuid();
         var serieDto = new SerieDto
         {
             ImdbIdentificator = "tt1234567",
-            TotalTemporadas = 3
+            TotalTemporadas = 3,
+            Temporadas = new List<TemporadaDto>
+        {
+            new TemporadaDto { NumeroTemporada = 1, Titulo = "Temporada 1" }
+        }
         };
 
         _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<Serie>());
+        _objectMapper.Setup(m => m.Map<SerieDto, Serie>(It.IsAny<SerieDto>())).Returns((SerieDto dto) => new Serie
+        {
+            ImdbIdentificator = dto.ImdbIdentificator,
+            TotalTemporadas = dto.TotalTemporadas,
+            CreatorId = userId,
+            Temporadas = dto.Temporadas.Select(t => new Temporada
+            {
+                NumeroTemporada = t.NumeroTemporada,
+                Titulo = t.Titulo
+            }).ToList()
+        });
 
         // Act
-        await _serieAppService.PersistirSeriesAsync(new[] {serieDto });
+        await _serieAppService.PersistirSeriesAsync(new[] { serieDto });
 
         // Assert
-        _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567"), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+        _serieRepositoryMock.Verify(r => r.InsertAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3 && s.CreatorId == userId), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
 
