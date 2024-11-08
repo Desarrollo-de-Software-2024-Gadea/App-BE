@@ -28,12 +28,12 @@ namespace SerializedStalker.ListasDeSeguimiento
             _serieRepository = serieRepository;
             _currentUser = currentUser;
         }
-        public async Task AddSerieAsync(string titulo) //int serieID
+        public async Task AddSerieAsync(string titulo)
         {
-            //var userEnt = _currentUser;
+            //Debemos agregar una forma de que se extraiga solo la lista del usuario actual.
             Guid userId = (Guid)_currentUser.Id;
             // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
-            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault();
+            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
 
             // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
@@ -62,7 +62,49 @@ namespace SerializedStalker.ListasDeSeguimiento
             // Actualiza la lista de seguimiento en la base de datos
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
         }
+        public async Task<Serie[]> MostrarSeriesAsync()
+        {
+            //var userEnt = _currentUser;
+            Guid userId = (Guid)_currentUser.Id;
+            // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
+            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
 
+            // Si no existe, crea una nueva lista de seguimiento
+            if (listaDeSeguimiento == null)
+            {
+                throw new Exception("No hay serie que mostrar.");
+            }
+            else
+            {
+                return listaDeSeguimiento.Series.ToArray();
+            }
+        }
+        public async Task EliminarSerieAsync(string ImdbID)
+        {
+            //var userEnt = _currentUser;
+            Guid userId = (Guid)_currentUser.Id;
+            // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
+            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
+
+            // Si no existe, crea una nueva lista de seguimiento
+            if (listaDeSeguimiento == null)
+            {
+                throw new Exception("No existe Lista de seguimiento.");
+            }
+            if (listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == ImdbID))
+            {
+                var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
+                listaDeSeguimiento.Series.Remove(serie); // Saca la serie a la lista
+                await _serieRepository.DeleteAsync(serie);
+            }
+            else
+            {
+                throw new Exception("No hay serie que eliminar.");
+            }
+            // Actualiza la lista de seguimiento en la base de datos
+            await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
+
+        }
     }
 }
 

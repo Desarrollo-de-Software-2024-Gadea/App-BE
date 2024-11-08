@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Auditing;
 using Volo.Abp.Domain.Entities;
 
 namespace SerializedStalker.Series
 {
-    public class Serie : AggregateRoot<int>, IMustHaveCreator<Guid>
+    public class Serie : AggregateRoot<int>, IMustHaveCreator<Guid>, ISoftDelete
     {
         public string Titulo { get; set; }  
         public string Clasificacion { get; set; } 
@@ -41,6 +42,8 @@ namespace SerializedStalker.Series
             Calificaciones = new List<Calificacion>();
         }
 
+        //Esta borrada
+        public Boolean IsDeleted { get; set; }
     }
 }
 
