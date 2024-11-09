@@ -8,6 +8,7 @@ using SerializedStalker.Series;
 using SerializedStalker.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using SerializedStalker.ListasDeSeguimiento;
 
 namespace SerializedStalker
 {
@@ -33,11 +34,9 @@ namespace SerializedStalker
                     return; // Datos ya sembrados
                 }
 
-                var userId = Guid.NewGuid(); // Simular un usuario
 
                 var serie = new Serie
                 {
-                    CreatorId = userId,
                     Titulo = "Test Serie",
                     Clasificacion = "PG-13",
                     FechaEstreno = "2023-01-01",
@@ -61,6 +60,26 @@ namespace SerializedStalker
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
+            }
+            /*public async Task SeedAsync(DataSeedContext context)
+            {
+                if (await _listaDeSeguimientoRepository.GetCountAsync() <= 0)
+                {
+                    var nuevaLista = new ListaDeSeguimiento
+                    {
+                        FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
+                    };
+                    var serieExistente = new Serie
+                    {
+                        ImdbIdentificator = "ID_Falso01",
+
+                    };
+                    /*                await _listaDeSeguimientoRepository.InsertAsync(
+
+                                        autoSave: true
+                                    );
+                    */
+                }
             }
         }
     }
