@@ -25,12 +25,14 @@ namespace SerializedStalker.ListasDeSeguimiento
         private readonly IObjectMapper _objectMapper;
 
         public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
-            IRepository<Serie, int> serieRepository, ICurrentUser currentUser, IObjectMapper objectMapper)
+            IRepository<Serie, int> serieRepository, ICurrentUser currentUser, IObjectMapper objectMapper, OmdbService service, SerieAppService serieAppService)
         { 
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _serieRepository = serieRepository;
             _currentUser = currentUser;
             _objectMapper = objectMapper;
+            _service = service;
+            _serieAppService = serieAppService;
         }
         public async Task AddSerieAsync(string titulo)
         {
@@ -69,7 +71,7 @@ namespace SerializedStalker.ListasDeSeguimiento
 
             // Actualiza la lista de seguimiento en la base de datos
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
-        }
+         }
         public async Task<SerieDto[]> MostrarSeriesAsync()
         {
             //var userEnt = _currentUser;

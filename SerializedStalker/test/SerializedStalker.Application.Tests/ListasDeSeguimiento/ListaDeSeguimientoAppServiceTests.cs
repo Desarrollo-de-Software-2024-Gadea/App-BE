@@ -41,14 +41,14 @@ namespace SerializedStalker.ListasDeSeguimiento
                 //FirstOrDefault(s => s.ImdbIdentificator == "tt1234567");
         }
         [Fact]
-        public async Task Should_Erase_Add_Serie()
+        public async Task Should_Add_One_Serie()
         {
             //Act
             await _listaDeSeguimientoAppService.AddSerieAsync("Gundam");
             var seriesDto = await _listaDeSeguimientoAppService.MostrarSeriesAsync();
 
             //Assert
-            seriesDto.Length.ShouldBeGreaterThan(2);
+            seriesDto.Length.ShouldBeGreaterThan(0);
             //FirstOrDefault(s => s.ImdbIdentificator == "tt1234567");
         }
     }

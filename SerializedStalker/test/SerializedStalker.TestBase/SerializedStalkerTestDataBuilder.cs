@@ -40,7 +40,7 @@ namespace SerializedStalker
         {
            using (_currentTenant.Change(context?.TenantId))
             {
-                if (await _context.Series.AnyAsync())
+                if (await _serieRepository.GetCountAsync() > 0)
                 {
                     return; // Datos ya sembrados
                 }
@@ -68,14 +68,14 @@ namespace SerializedStalker
                 };
 
                 await _serieRepository.InsertAsync(serie);
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
                 var listaDeSeguimientoSEED = new ListaDeSeguimiento
                 {
                     FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
                 };
                 listaDeSeguimientoSEED.Series.Add(serie);
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimientoSEED); //No esta utilizando lo creado por el SEEDer
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
 
                 //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
