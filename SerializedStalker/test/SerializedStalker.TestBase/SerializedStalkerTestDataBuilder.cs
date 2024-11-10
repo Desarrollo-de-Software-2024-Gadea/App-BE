@@ -22,8 +22,11 @@ namespace SerializedStalker
         private readonly ILogger<SerializedStalkerTestDataSeedContributor> _logger;
 
 
-        public SerializedStalkerTestDataSeedContributor(IRepository<Serie, int> serieRepository, IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, 
-            ICurrentTenant currentTenant, SerializedStalkerDbContext context, ILogger<SerializedStalkerTestDataSeedContributor> logger)
+        public SerializedStalkerTestDataSeedContributor(
+            IRepository<Serie, int> serieRepository, 
+            IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, 
+            ICurrentTenant currentTenant, SerializedStalkerDbContext context, 
+            ILogger<SerializedStalkerTestDataSeedContributor> logger)
         {
             _serieRepository = serieRepository;
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
@@ -35,7 +38,7 @@ namespace SerializedStalker
 
         public async Task SeedAsync(DataSeedContext context)
         {
-            using (_currentTenant.Change(context?.TenantId))
+           using (_currentTenant.Change(context?.TenantId))
             {
                 if (await _context.Series.AnyAsync())
                 {
@@ -66,14 +69,15 @@ namespace SerializedStalker
 
                 await _serieRepository.InsertAsync(serie);
                 await _context.SaveChangesAsync();
-                var listaDeSeguimiento = new ListaDeSeguimiento
+                var listaDeSeguimientoSEED = new ListaDeSeguimiento
                 {
                     FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
                 };
-                await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
+                listaDeSeguimientoSEED.Series.Add(serie);
+                await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimientoSEED); //No esta utilizando lo creado por el SEEDer
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
+                //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
            
         }

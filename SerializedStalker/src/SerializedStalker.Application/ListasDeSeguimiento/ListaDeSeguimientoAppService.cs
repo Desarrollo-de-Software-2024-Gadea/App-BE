@@ -9,6 +9,7 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
 using Microsoft.AspNetCore.Authorization;
+using Volo.Abp.ObjectMapping;
 
 
 namespace SerializedStalker.ListasDeSeguimiento
@@ -21,12 +22,15 @@ namespace SerializedStalker.ListasDeSeguimiento
         private readonly ICurrentUser _currentUser;
         private readonly OmdbService _service;
         private readonly SerieAppService _serieAppService;
+        private readonly IObjectMapper _objectMapper;
 
-        public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, IRepository<Serie, int> serieRepository, ICurrentUser currentUser)
+        public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
+            IRepository<Serie, int> serieRepository, ICurrentUser currentUser, IObjectMapper objectMapper)
         { 
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _serieRepository = serieRepository;
             _currentUser = currentUser;
+            _objectMapper = objectMapper;
         }
         public async Task AddSerieAsync(string titulo)
         {
@@ -66,7 +70,7 @@ namespace SerializedStalker.ListasDeSeguimiento
             // Actualiza la lista de seguimiento en la base de datos
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
         }
-        public async Task<Serie[]> MostrarSeriesAsync()
+        public async Task<SerieDto[]> MostrarSeriesAsync()
         {
             //var userEnt = _currentUser;
             Guid userId = (Guid)_currentUser.Id;
@@ -80,7 +84,14 @@ namespace SerializedStalker.ListasDeSeguimiento
             }
             else
             {
-                return listaDeSeguimiento.Series.ToArray();
+                var listaSeries = new List<SerieDto>();
+                var series = listaDeSeguimiento.Series.ToArray();
+                foreach (var serie in series)
+                {
+                    var elementoLista = _objectMapper.Map<Serie, SerieDto>(serie);
+                    listaSeries.Add(elementoLista);
+                }
+                return listaSeries.ToArray();
             }
         }
         public async Task EliminarSerieAsync(string ImdbID)
