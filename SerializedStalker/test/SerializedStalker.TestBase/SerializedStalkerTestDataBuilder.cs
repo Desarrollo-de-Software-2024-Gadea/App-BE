@@ -9,20 +9,28 @@ using SerializedStalker.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SerializedStalker.ListasDeSeguimiento;
+using Volo.Abp.Domain.Repositories;
 
 namespace SerializedStalker
 {
     public class SerializedStalkerTestDataSeedContributor : IDataSeedContributor, ITransientDependency
     {
+        private readonly IRepository<Serie, int> _serieRepository;
+        private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
         private readonly ICurrentTenant _currentTenant;
         private readonly SerializedStalkerDbContext _context;
         private readonly ILogger<SerializedStalkerTestDataSeedContributor> _logger;
 
-        public SerializedStalkerTestDataSeedContributor(ICurrentTenant currentTenant, SerializedStalkerDbContext context, ILogger<SerializedStalkerTestDataSeedContributor> logger)
+
+        public SerializedStalkerTestDataSeedContributor(IRepository<Serie, int> serieRepository, IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, 
+            ICurrentTenant currentTenant, SerializedStalkerDbContext context, ILogger<SerializedStalkerTestDataSeedContributor> logger)
         {
+            _serieRepository = serieRepository;
+            _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _currentTenant = currentTenant;
             _context = context;
             _logger = logger;
+            
         }
 
         public async Task SeedAsync(DataSeedContext context)
@@ -56,31 +64,18 @@ namespace SerializedStalker
                     Calificaciones = new List<Calificacion>()
                 };
 
-                await _context.Series.AddAsync(serie);
+                await _serieRepository.InsertAsync(serie);
+                await _context.SaveChangesAsync();
+                var listaDeSeguimiento = new ListaDeSeguimiento
+                {
+                    FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
+                };
+                await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
-            /*public async Task SeedAsync(DataSeedContext context)
-            {
-                if (await _listaDeSeguimientoRepository.GetCountAsync() <= 0)
-                {
-                    var nuevaLista = new ListaDeSeguimiento
-                    {
-                        FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
-                    };
-                    var serieExistente = new Serie
-                    {
-                        ImdbIdentificator = "ID_Falso01",
-
-                    };
-                    /*                await _listaDeSeguimientoRepository.InsertAsync(
-
-                                        autoSave: true
-                                    );
-                    */
-                }
-            }
+           
         }
-    }
+    }   
 }

@@ -38,7 +38,10 @@ namespace SerializedStalker.ListasDeSeguimiento
             // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
             {
-                listaDeSeguimiento = new ListaDeSeguimiento();
+                listaDeSeguimiento = new ListaDeSeguimiento()
+                {
+                    FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
+                };
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
             }
 
@@ -53,6 +56,7 @@ namespace SerializedStalker.ListasDeSeguimiento
                 await _serieAppService.PersistirSeriesAsync(serieApi);
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
                 listaDeSeguimiento.Series.Add(serie); // Añade la serie a la lista
+                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now); //Actualiza la fecha de modificación
             }
             else
             {
@@ -96,6 +100,7 @@ namespace SerializedStalker.ListasDeSeguimiento
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
                 listaDeSeguimiento.Series.Remove(serie); // Saca la serie a la lista
                 await _serieRepository.DeleteAsync(serie);
+                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now); //Actualiza la fecha de modificación
             }
             else
             {
