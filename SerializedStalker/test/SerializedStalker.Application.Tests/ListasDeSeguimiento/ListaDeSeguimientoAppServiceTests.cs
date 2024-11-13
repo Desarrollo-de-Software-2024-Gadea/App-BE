@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using SerializedStalker.EntityFrameworkCore;
 using SerializedStalker.Series;
 using Shouldly;
 using Volo.Abp.Application.Dtos;
@@ -16,10 +18,12 @@ namespace SerializedStalker.ListasDeSeguimiento
     where TStartupModule : IAbpModule
     {
         private readonly IListaDeSeguimientoAppService _listaDeSeguimientoAppService;
+        private readonly SerializedStalkerDbContext _dbContext;
 
         protected ListaDeSeguimientoAppServiceTests()
         {
             _listaDeSeguimientoAppService = GetRequiredService<IListaDeSeguimientoAppService>();
+            _dbContext = GetRequiredService<SerializedStalkerDbContext>();
         }
         [Fact]
         public async Task Should_Show_Series_Of_The_List()
@@ -64,11 +68,13 @@ namespace SerializedStalker.ListasDeSeguimiento
                 Tipo = "Serie",
             };
             await _listaDeSeguimientoAppService.AddSerieAsync(serieDto);
-            var seriesDto = await _listaDeSeguimientoAppService.MostrarSeriesAsync();
 
-            //Assert
-            seriesDto.Length.ShouldBeGreaterThan(0); //Si hacemos funcionar el SEEDer entonces 0 deberia pasar a 1
-            //FirstOrDefault(s => s.ImdbIdentificator == "tt1234567");
+            // Assert: verifica en la base de datos
+            var serieEnDb = await _dbContext.Series
+                .FirstOrDefaultAsync(s => s.ImdbIdentificator == "xx54da154");
+
+            serieEnDb.ShouldNotBeNull(); // Verifica que la serie fue guardada
+            serieEnDb.Titulo.ShouldBe("Test 2"); // Verifica que los datos coinciden
         }
     }
 }
