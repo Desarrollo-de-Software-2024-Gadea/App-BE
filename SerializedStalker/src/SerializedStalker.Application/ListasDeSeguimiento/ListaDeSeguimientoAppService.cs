@@ -34,7 +34,7 @@ namespace SerializedStalker.ListasDeSeguimiento
             _service = service;
             _serieAppService = serieAppService;
         }
-        public async Task AddSerieAsync(string titulo)
+        public async Task AddSerieAsync(SerieDto serieDto)
         {
             //Debemos agregar una forma de que se extraiga solo la lista del usuario actual.
             Guid userId = (Guid)_currentUser.Id;
@@ -51,15 +51,13 @@ namespace SerializedStalker.ListasDeSeguimiento
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
             }
 
-            //Obtenemos el serieDto
-            var serieApi = await _service.BuscarSerieAsync(titulo, null);
-            // Busca la serie por ID
-            //var serie = await _serieRepository.GetAsync(serieID);
-
             // Comprueba si la serie ya está en la lista
-            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieApi.FirstOrDefault().ImdbIdentificator))
+            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieDto.ImdbIdentificator))
             {
-                await _serieAppService.PersistirSeriesAsync(serieApi);
+                //Agrgar serieDto a un lista para poderla persistir
+                var seriesDto = new List<SerieDto>();
+                seriesDto.Add(serieDto);
+                await _serieAppService.PersistirSeriesAsync(seriesDto.ToArray());
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
                 listaDeSeguimiento.Series.Add(serie); // Añade la serie a la lista
                 listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now); //Actualiza la fecha de modificación
