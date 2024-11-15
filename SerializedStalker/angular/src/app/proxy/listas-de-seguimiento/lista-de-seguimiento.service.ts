@@ -4,14 +4,15 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class WatchlistService {
+export class ListaDeSeguimientoService {
   apiName = 'Default';
   
 
-  addSerie = (serieId: number, config?: Partial<Rest.Config>) =>
+  addSerie = (titulo: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, void>({
       method: 'POST',
-      url: `/api/app/watchlist/serie/${serieId}`,
+      url: '/api/app/lista-de-seguimiento/serie',
+      params: { titulo },
     },
     { apiName: this.apiName,...config });
 

@@ -1,3 +1,5 @@
+import * as Controllers from './controllers';
+import * as ListasDeSeguimiento from './listas-de-seguimiento';
+import * as Microsoft from './microsoft';
 import * as Series from './series';
-import * as Watchlists from './watchlists';
-export { Series, Watchlists };
+export { Controllers, ListasDeSeguimiento, Microsoft, Series };

@@ -1,4 +1,4 @@
-import type { CreateUpdateSerieDto, SerieDto } from './models';
+import type { CalificacionDto, CreateUpdateSerieDto, SerieDto, TemporadaDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -8,6 +8,33 @@ import { Injectable } from '@angular/core';
 })
 export class SerieService {
   apiName = 'Default';
+  
+
+  buscarSerie = (titulo: string, genero?: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, SerieDto[]>({
+      method: 'POST',
+      url: '/api/app/serie/buscar-serie',
+      params: { titulo, genero },
+    },
+    { apiName: this.apiName,...config });
+  
+
+  buscarTemporada = (imdbId: string, numeroTemporada: number, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, TemporadaDto>({
+      method: 'POST',
+      url: `/api/app/serie/buscar-temporada/${imdbId}`,
+      params: { numeroTemporada },
+    },
+    { apiName: this.apiName,...config });
+  
+
+  calificarSerie = (input: CalificacionDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'POST',
+      url: '/api/app/serie/calificar-serie',
+      body: input,
+    },
+    { apiName: this.apiName,...config });
   
 
   create = (input: CreateUpdateSerieDto, config?: Partial<Rest.Config>) =>
@@ -44,11 +71,11 @@ export class SerieService {
     { apiName: this.apiName,...config });
   
 
-  search = (title: string, gender: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, SerieDto[]>({
+  persistirSeries = (seriesDto: SerieDto[], config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
       method: 'POST',
-      url: '/api/app/serie/search',
-      params: { title, gender },
+      url: '/api/app/serie/persistir-series',
+      body: seriesDto,
     },
     { apiName: this.apiName,...config });
   
