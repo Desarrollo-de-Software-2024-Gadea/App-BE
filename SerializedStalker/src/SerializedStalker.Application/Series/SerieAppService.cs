@@ -15,7 +15,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace SerializedStalker.Series
 {
-    [Authorize]
+    //[Authorize]
     public class SerieAppService : CrudAppService<Serie, SerieDto, int, PagedAndSortedResultRequestDto, CreateUpdateSerieDto, CreateUpdateSerieDto>, ISerieAppService
     {
         private readonly ISeriesApiService _seriesApiService;

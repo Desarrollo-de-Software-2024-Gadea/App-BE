@@ -7,8 +7,7 @@ import { provideIdentityConfig } from '@abp/ng.identity/config';
 import { provideAccountConfig } from '@abp/ng.account/config';
 import { provideTenantManagementConfig } from '@abp/ng.tenant-management/config';
 import { registerLocale } from '@abp/ng.core/locale';
-import { ThemeLeptonXModule } from '@abp/ng.theme.lepton-x';
-import { SideMenuLayoutModule } from '@abp/ng.theme.lepton-x/layouts';
+import { ThemeBasicModule, provideThemeBasicConfig } from '@abp/ng.theme.basic';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -25,8 +24,7 @@ import { APP_ROUTE_PROVIDER } from './route.provider';
     AppRoutingModule,
     ThemeSharedModule,
     CoreModule,
-    ThemeLeptonXModule.forRoot(),
-    SideMenuLayoutModule.forRoot(),
+    ThemeBasicModule,
   ],
   providers: [
     APP_ROUTE_PROVIDER,
@@ -43,6 +41,7 @@ import { APP_ROUTE_PROVIDER } from './route.provider';
     provideAccountConfig(),
     provideTenantManagementConfig(),
     provideAbpThemeShared(),
+    provideThemeBasicConfig(),
   ],
   bootstrap: [AppComponent],
 })
