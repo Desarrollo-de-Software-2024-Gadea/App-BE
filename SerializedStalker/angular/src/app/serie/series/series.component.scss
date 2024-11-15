@@ -1,0 +1,80 @@
+// series.component.scss
+
+// General styles for the component
+:host {
+    display: block;
+    padding: 20px;
+    background-color: #f8f9fa; // Light background color
+    border-radius: 8px; // Rounded corners
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); // Subtle shadow
+}
+
+// Styles for the search form
+form {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ced4da; // Light border
+        border-radius: 4px; // Rounded input
+        font-size: 16px;
+
+        &:focus {
+            border-color: #80bdff; // Change border color on focus
+            outline: none; // Remove default outline
+        }
+    }
+
+    button {
+        padding: 10px 15px;
+        margin-left: 10px;
+        background-color: #007bff; // Primary button color
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #0056b3; // Darker shade on hover
+        }
+    }
+}
+
+// Styles for the data table
+ngx-datatable {
+    margin-top: 20px;
+
+    // Header styles
+    .ngx-datatable-header {
+        background-color: #007bff; // Header background color
+        color: white; // Header text color
+    }
+
+    // Row styles
+    .ngx-datatable-row {
+        &:nth-child(odd) {
+            background-color: #f2f2f2; // Zebra striping for rows
+        }
+
+        &:hover {
+            background-color: #e9ecef; // Highlight row on hover
+        }
+    }
+
+    // Column styles
+    ngx-datatable-column {
+        text-align: left; // Align text to the left
+    }
+}
+
+// Styles for the poster image
+img {
+    border-radius: 4px; // Rounded corners for images
+    width: 200px; // Set width for posters
+    height: auto; // Maintain aspect ratio
+    max-height: 300px; // Set maximum height for posters
+    object-fit: cover; // Ensure the image covers the area without distortion
+}
