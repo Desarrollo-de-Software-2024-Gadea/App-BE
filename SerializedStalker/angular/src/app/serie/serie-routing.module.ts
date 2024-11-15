@@ -3,14 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { SeriesComponent } from './series/series.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: SeriesComponent,
-    }
+  { path: '', component: SeriesComponent } // Ruta por defecto
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes, {})],
-    exports: [RouterModule],
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
 })
 export class SerieRoutingModule { }
