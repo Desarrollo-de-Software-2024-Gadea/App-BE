@@ -89,11 +89,47 @@ namespace SerializedStalker.Series
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
+        public async Task ModificarCalificacionAsync(CalificacionDto input)
+        {
+            // Obtener la serie del repositorio
+            var serie = await _serieRepository.GetAsync(input.SerieID);
+            if (serie == null)
+            {
+                throw new EntityNotFoundException(typeof(Serie), input.SerieID);
+            }
 
-        //public async Task<TemporadaDto> ModificarCalificacionAsync(CalificacionDto input)
-        //{ }
-            // Nuevo método para persistir las series en la base de datos
-            public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+            // Obtener el ID del usuario actual
+            var userIdActual = _currentUserService.GetCurrentUserId();
+            if (!userIdActual.HasValue)
+            {
+                throw new InvalidOperationException("User ID cannot be null");
+            }
+
+            // Un usuario solo puede calificar las series relacionadas a él
+            if (serie.CreatorId != userIdActual.Value)
+            {
+                throw new UnauthorizedAccessException("No puedes calificar esta serie.");
+            }
+
+            // Un usuario no puede modificar una calificación que no existe
+            var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.UsuarioId == userIdActual.Value);
+            if (calificacionExistente == null)
+            {
+                throw new InvalidOperationException("No hay calificación que modificar.");
+            }
+
+
+            // Crear una nueva instancia o modificar la existente
+            calificacionExistente.calificacion = input.calificacion; // Asegúrate de usar la propiedad correcta de input
+            calificacionExistente.comentario = input.comentario;
+            calificacionExistente.FechaCreacion = DateTime.Now; // Puedes agregar esta propiedad para auditar cambios        
+
+            // Actualizar la serie en el repositorio
+            await _serieRepository.UpdateAsync(serie);
+        }
+
+        // Nuevo método para persistir las series en la base de datos
+        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
         {
             var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series //No esta devolviendo GetListAsync nada
 
