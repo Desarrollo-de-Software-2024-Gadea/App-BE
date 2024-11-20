@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SerializedStalker.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace SerializedStalker.Migrations
 {
     [DbContext(typeof(SerializedStalkerDbContext))]
-    partial class SerializedStalkerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241108213012_Add_User_To_Lista")]
+    partial class Add_User_To_Lista
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,12 +284,6 @@ namespace SerializedStalker.Migrations
 
                     b.Property<int>("ImdbVotos")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
 
                     b.Property<int?>("ListaDeSeguimientoId")
                         .HasColumnType("int");
