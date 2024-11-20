@@ -18,20 +18,20 @@ namespace SerializedStalker
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
         private readonly ICurrentTenant _currentTenant;
-        private readonly SerializedStalkerDbContext _context;
+        //private readonly SerializedStalkerDbContext _context;
         private readonly ILogger<SerializedStalkerTestDataSeedContributor> _logger;
 
 
         public SerializedStalkerTestDataSeedContributor(
             IRepository<Serie, int> serieRepository, 
             IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, 
-            ICurrentTenant currentTenant, SerializedStalkerDbContext context, 
+            ICurrentTenant currentTenant, //SerializedStalkerDbContext context, 
             ILogger<SerializedStalkerTestDataSeedContributor> logger)
         {
             _serieRepository = serieRepository;
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _currentTenant = currentTenant;
-            _context = context;
+          //  _context = context;
             _logger = logger;
             
         }
@@ -75,7 +75,7 @@ namespace SerializedStalker
                 };
                 listaDeSeguimientoSEED.Series.Add(serie);
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimientoSEED); //No esta utilizando lo creado por el SEEDer
-                //await _context.SaveChangesAsync();
+                //await context. .SaveChangesAsync();
 
                 //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
