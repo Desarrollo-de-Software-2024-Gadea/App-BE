@@ -14,6 +14,7 @@ using Xunit;
 using Volo.Abp.ObjectMapping;
 using Autofac.Core;
 using System.Linq;
+using Volo.Abp.Domain.Entities;
 
 
 public class SerieAppServiceTests
@@ -169,6 +170,136 @@ public class SerieAppServiceTests
 
         // Assert
         _serieRepositoryMock.Verify(r => r.InsertAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3 && s.CreatorId == userId), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    //Tests para modificar calificación
+
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenSerieNotFound()
+    {
+        // Arrange
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync((Serie)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenUserNotFound()
+    {
+        // Arrange
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = Guid.NewGuid(),
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns((Guid?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenUserNotAuthorized()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = Guid.NewGuid(), // Different user
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenCalificacionNotFound()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldUpdateCalificacion_WhenValid()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var calificacionExistente = new Calificacion
+        {
+            UsuarioId = userId,
+            calificacion = 3,
+            comentario = "Good series"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion> { calificacionExistente }
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act
+        await _serieAppService.ModificarCalificacionAsync(calificacionDto);
+
+        // Assert
+        Assert.Equal(calificacionDto.calificacion, calificacionExistente.calificacion);
+        Assert.Equal(calificacionDto.comentario, calificacionExistente.comentario);
+        _serieRepositoryMock.Verify(r => r.UpdateAsync(serie, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
 

@@ -91,6 +91,11 @@ namespace SerializedStalker.Series
         }
         public async Task ModificarCalificacionAsync(CalificacionDto input)
         {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
             // Obtener la serie del repositorio
             var serie = await _serieRepository.GetAsync(input.SerieID);
             if (serie == null)
