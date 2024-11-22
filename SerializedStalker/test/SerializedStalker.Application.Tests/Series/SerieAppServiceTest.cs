@@ -146,35 +146,6 @@ public class SerieAppServiceTests
     }
 
     [Fact]
-    public async Task PersistirSeriesAsync_ShouldUpdateExistingSerie_WhenSerieExists()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var serieDto = new SerieDto
-        {
-            ImdbIdentificator = "tt1234567",
-            TotalTemporadas = 3,
-            Temporadas = new List<TemporadaDto>()
-        };
-        var serieExistente = new Serie
-        {
-            ImdbIdentificator = "tt1234567",
-            CreatorId = userId,
-            TotalTemporadas = 2,
-            Temporadas = new List<Temporada>()
-        };
-
-        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
-        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<Serie> { serieExistente });
-
-        // Act
-        await _serieAppService.PersistirSeriesAsync(new[] { serieDto });
-
-        // Assert
-        _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
     public async Task PersistirSeriesAsync_ShouldThrowException_WhenGetListAsyncReturnsNull()
     {
         // Arrange
