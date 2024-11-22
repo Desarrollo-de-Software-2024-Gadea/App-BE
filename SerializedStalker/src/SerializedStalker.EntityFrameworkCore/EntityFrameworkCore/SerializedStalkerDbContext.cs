@@ -102,7 +102,7 @@ public class SerializedStalkerDbContext :
         base.OnModelCreating(builder);
 
         //// Configuración del filtro global para CreatorId basado en el usuario actual
-   builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
+   //builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
 
         /* Include modules to your migration db context */
 
@@ -118,7 +118,7 @@ public class SerializedStalkerDbContext :
 
         /* Configure your own tables/entities inside here */
         //// Configuración del filtro global para CreatorId basado en el usuario actual
-        builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
+        //builder.Entity<Serie>().HasQueryFilter(serie => serie.CreatorId == _currentUserService.GetCurrentUserId());
         //Serie
         builder.Entity<Serie>(b =>
         {
@@ -205,7 +205,8 @@ public class SerializedStalkerDbContext :
                 SerializedStalkerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
             b.Property(x => x.FechaModificacion).IsRequired();
-
+            b.HasMany(ls => ls.Series)
+                 .WithOne();
         });
 
         //Notificación

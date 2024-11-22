@@ -32,7 +32,8 @@ namespace SerializedStalker.ListasDeSeguimiento
             var seriesDto = await _listaDeSeguimientoAppService.MostrarSeriesAsync();
 
             //Assert
-            seriesDto.FirstOrDefault(s => s.ImdbIdentificator == "tt1234567"); //Falso positivo
+            Assert.NotEmpty(seriesDto);
+            //.FirstOrDefault(s => s.ImdbIdentificator == "tt1234567"); //Falso positivo
         }
         [Fact]
         public async Task Should_Erase_One_Serie()
