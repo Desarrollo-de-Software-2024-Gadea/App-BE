@@ -98,8 +98,12 @@ namespace SerializedStalker.ListasDeSeguimiento
         {
             //var userEnt = _currentUser;
             Guid userId = (Guid)_currentUser.Id;
-            // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
-            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
+            //Get a IQueryable<T> by including sub collections
+            var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
+
+            //Apply additional LINQ extension methods
+
+            var listaDeSeguimiento = await AsyncExecuter.FirstOrDefaultAsync(queryable);
 
             // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
