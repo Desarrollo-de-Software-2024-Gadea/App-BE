@@ -10,6 +10,8 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.ObjectMapping;
+using static Volo.Abp.Identity.Settings.IdentitySettingNames;
+using static Volo.Abp.Identity.IdentityPermissions;
 
 
 namespace SerializedStalker.ListasDeSeguimiento
@@ -74,26 +76,24 @@ namespace SerializedStalker.ListasDeSeguimiento
         {
             //var userEnt = _currentUser;
             Guid userId = (Guid)_currentUser.Id;
-            // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
-            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
+
+            //Get a IQueryable<T> by including sub collections
+            var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
+
+            //Apply additional LINQ extension methods
+                        
+            var listaDeSeguimiento = await AsyncExecuter.FirstOrDefaultAsync(queryable);
 
             // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
             {
                 throw new Exception("No hay serie que mostrar.");
             }
-            else
-            {
-                var listaSeries = new List<SerieDto>();
-                var series = listaDeSeguimiento.Series.ToArray();
-                foreach (var serie in series)
-                {
-                    var elementoLista = _objectMapper.Map<Serie, SerieDto>(serie);
-                    listaSeries.Add(elementoLista);
-                }
-                return listaSeries.ToArray();
-            }
+
+            return  ObjectMapper.Map< Serie[], SerieDto[]>(listaDeSeguimiento.Series.ToArray());            
         }
+
+
         public async Task EliminarSerieAsync(string ImdbID)
         {
             //var userEnt = _currentUser;
