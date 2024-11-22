@@ -14,6 +14,7 @@ using Xunit;
 using Volo.Abp.ObjectMapping;
 using Autofac.Core;
 using System.Linq;
+using Volo.Abp.Domain.Entities;
 
 
 public class SerieAppServiceTests
@@ -107,39 +108,12 @@ public class SerieAppServiceTests
         _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.Calificaciones.Count == 1), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    //Tests para persistir serie
     [Fact]
-    public async Task PersistirSeriesAsync_ShouldThrowException_WhenSerieAlreadyExistsForUser()
+    public async Task PersistirSeriesAsync_ShouldInsertNewSerie_WhenSerieDoesNotExist()
     {
         // Arrange
-        Guid userId = Guid.NewGuid(); // Asumiendo que el ID del usuario es un entero
-        var serieId = 1;
-        var serieDto = new SerieDto
-        {
-            ImdbIdentificator = "tt1234567",
-            TotalTemporadas =3
-        };
-
-        var serieExistente = new Serie
-        {
-            ImdbIdentificator = "tt1234567",
-            //CreatorId = userId,
-            TotalTemporadas = 2
-        };
-
-        // _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<Serie> { serieExistente });
-        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serieExistente);
-        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
-        //Parece que el test no obtiene los datos hechos con el Mock
-    }
-
-    [Fact]
-    public async Task PersistirSeriesAsync_ShouldAdd_New_Serie()
-    {
-        // Arrange
-        Guid userId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var serieDto = new SerieDto
         {
             ImdbIdentificator = "tt1234567",
@@ -170,6 +144,173 @@ public class SerieAppServiceTests
         // Assert
         _serieRepositoryMock.Verify(r => r.InsertAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3 && s.CreatorId == userId), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task PersistirSeriesAsync_ShouldThrowException_WhenGetListAsyncReturnsNull()
+    {
+        // Arrange
+        var serieDto = new SerieDto
+        {
+            ImdbIdentificator = "tt1234567",
+            TotalTemporadas = 3
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync((List<Serie>)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
+    }
+
+    //Tests para modificar calificación
+
+    /// <summary>
+    /// Verifica que el método <c>ModificarCalificacionAsync</c> lance una excepción <see cref="EntityNotFoundException"/> 
+    /// cuando la serie especificada no se encuentra en el repositorio.
+    /// </summary>
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenSerieNotFound()
+    {
+        // Arrange
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync((Serie)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>ModificarCalificacionAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
+    /// cuando el usuario actual no puede ser encontrado.
+    /// </summary>
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenUserNotFound()
+    {
+        // Arrange
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = Guid.NewGuid(),
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns((Guid?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>ModificarCalificacionAsync</c> lance una excepción <see cref="UnauthorizedAccessException"/> 
+    /// cuando el usuario actual no está autorizado para modificar la calificación de la serie.
+    /// </summary>
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenUserNotAuthorized()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = Guid.NewGuid(), // Different user
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>ModificarCalificacionAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
+    /// cuando no se encuentra una calificación existente para el usuario actual en la serie especificada.
+    /// </summary>
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldThrowException_WhenCalificacionNotFound()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.ModificarCalificacionAsync(calificacionDto));
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>ModificarCalificacionAsync</c> actualice correctamente la calificación y el comentario de una serie 
+    /// cuando se proporcionan datos válidos. Además, verifica que el método <c>UpdateAsync</c> del repositorio sea llamado una vez.
+    /// </summary>
+    [Fact]
+    public async Task ModificarCalificacionAsync_ShouldUpdateCalificacion_WhenValid()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = 1,
+            calificacion = 5,
+            comentario = "Great series!"
+        };
+
+        var calificacionExistente = new Calificacion
+        {
+            UsuarioId = userId,
+            calificacion = 3,
+            comentario = "Good series"
+        };
+
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion> { calificacionExistente }
+        };
+
+        _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+
+        // Act
+        await _serieAppService.ModificarCalificacionAsync(calificacionDto);
+
+        // Assert
+        Assert.Equal(calificacionDto.calificacion, calificacionExistente.calificacion);
+        Assert.Equal(calificacionDto.comentario, calificacionExistente.comentario);
+        _serieRepositoryMock.Verify(r => r.UpdateAsync(serie, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
 }
 
 // Clase derivada para tests

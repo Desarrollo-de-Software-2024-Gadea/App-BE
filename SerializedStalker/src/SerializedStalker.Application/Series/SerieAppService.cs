@@ -89,13 +89,55 @@ namespace SerializedStalker.Series
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
-
-        //public async Task<TemporadaDto> ModificarCalificacionAsync(CalificacionDto input)
-        //{ }
-            // Nuevo método para persistir las series en la base de datos
-            public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+        public async Task ModificarCalificacionAsync(CalificacionDto input)
         {
-            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series //No esta devolviendo GetListAsync nada
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            // Obtener la serie del repositorio
+            var serie = await _serieRepository.GetAsync(input.SerieID);
+            if (serie == null)
+            {
+                throw new EntityNotFoundException(typeof(Serie), input.SerieID);
+            }
+
+            // Obtener el ID del usuario actual
+            var userIdActual = _currentUserService.GetCurrentUserId();
+            if (!userIdActual.HasValue)
+            {
+                throw new InvalidOperationException("User ID cannot be null");
+            }
+
+            // Un usuario solo puede calificar las series relacionadas a él
+            if (serie.CreatorId != userIdActual.Value)
+            {
+                throw new UnauthorizedAccessException("No puedes calificar esta serie.");
+            }
+
+            // Un usuario no puede modificar una calificación que no existe
+            var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.UsuarioId == userIdActual.Value);
+            if (calificacionExistente == null)
+            {
+                throw new InvalidOperationException("No hay calificación que modificar.");
+            }
+
+
+            // Crear una nueva instancia o modificar la existente
+            calificacionExistente.calificacion = input.calificacion; // Asegúrate de usar la propiedad correcta de input
+            calificacionExistente.comentario = input.comentario;
+            calificacionExistente.FechaCreacion = DateTime.Now; // Puedes agregar esta propiedad para auditar cambios        
+
+            // Actualizar la serie en el repositorio
+            await _serieRepository.UpdateAsync(serie);
+        }
+
+        // Nuevo método para persistir las series en la base de datos
+        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+        {
+            // Obtener todas las series existentes
+            var seriesExistentes = await _serieRepository.GetListAsync();
 
             if (seriesExistentes == null)
             {
@@ -106,14 +148,26 @@ namespace SerializedStalker.Series
             {
                 // Comprobación para evitar excepciones al acceder a propiedades de un objeto que podría ser null
                 if (serieDto == null) continue; // Salta si serieDto es null
+
                 var userIdActual = _currentUserService.GetCurrentUserId();
-                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual);
+                if (!userIdActual.HasValue)
+                {
+                    throw new InvalidOperationException("User ID cannot be null");
+                }
+
+                // Verificar que serieDto.ImdbIdentificator no sea null
+                if (serieDto.ImdbIdentificator == null)
+                {
+                    throw new InvalidOperationException("ImdbIdentificator cannot be null");
+                }
+
+                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual.Value);
 
                 if (serieExistente == null)
                 {
-                    // Crear nueva serie                 
-                    // Utilizar mappers nuevaSerie
+                    // Crear nueva serie
                     var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
+                    nuevaSerie.CreatorId = userIdActual.Value; // Asignar el ID del creador
 
                     // Asegúrate de que Temporadas no sea null
                     if (serieDto.Temporadas != null)
@@ -121,18 +175,6 @@ namespace SerializedStalker.Series
                         foreach (var temporadaDto in serieDto.Temporadas)
                         {
                             var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
-                            /*var nuevaTemporada = new Temporada
-                            {
-                                NumeroTemporada = temporadaDto.NumeroTemporada,
-                                Titulo = temporadaDto.Titulo,
-                                FechaLanzamiento = temporadaDto.FechaLanzamiento,
-                                Episodios = temporadaDto.Episodios.Select(e => new Episodio
-                                {
-                                    NumeroEpisodio = e.NumeroEpisodio,
-                                    Titulo = e.Titulo,
-                                    FechaEstreno = e.FechaEstreno
-                                }).ToList()
-                            };*/
                             nuevaSerie.Temporadas.Add(nuevaTemporada);
                         }
                     }
@@ -144,6 +186,26 @@ namespace SerializedStalker.Series
                 {
                     // Actualizar la serie existente con nueva información
                     serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+
+                    // Actualizar temporadas si es necesario
+                    if (serieDto.Temporadas != null)
+                    {
+                        foreach (var temporadaDto in serieDto.Temporadas)
+                        {
+                            var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
+                            if (temporadaExistente == null)
+                            {
+                                var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                                serieExistente.Temporadas.Add(nuevaTemporada);
+                            }
+                            else
+                            {
+                                // Actualizar la temporada existente
+                                _objectMapper.Map(temporadaDto, temporadaExistente);
+                            }
+                        }
+                    }
+
                     await _serieRepository.UpdateAsync(serieExistente);
                 }
             }
