@@ -59,48 +59,45 @@ namespace SerializedStalker.Series
 
         private async Task<SerieDto[]> ObtenerSeriesDesdeOmdbAsync(string url)
         {
-            // Inicializar el monitoreo del tiempo
-            var monitoreo = new MonitoreoApi
+            try
             {
-                HoraEntrada = DateTime.Now // Registrar la hora de entrada
-            };
-
-            using (var httpClient = new HttpClient())
-            {
-                var response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                monitoreo.HoraSalida = DateTime.Now; // Registrar la hora de salida
-
-                // Aquí podemos agregar el código para almacenar o procesar el monitoreo, si es necesario.
-
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var json = JObject.Parse(jsonResponse);
-
-                if (json["Response"]?.ToString() == "False")
+                using (var httpClient = new HttpClient())
                 {
-                    return Array.Empty<SerieDto>();
-                }
+                    var response = await httpClient.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
 
-                var seriesJson = json["Search"];
-                if (seriesJson == null)
-                {
-                    return Array.Empty<SerieDto>();
-                }
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var json = JObject.Parse(jsonResponse);
 
-                var seriesList = new List<SerieDto>();
-                foreach (var serie in seriesJson)
-                {
-                    var serieId = serie["imdbID"]?.ToString();
-                    var serieDetails = await ObtenerDetallesSerieAsync(serieId);
-
-                    if (serieDetails != null)
+                    if (json["Response"]?.ToString() == "False")
                     {
-                        seriesList.Add(serieDetails);
+                        throw new Exception("Error en la respuesta de la API: " + json["Error"]?.ToString());
                     }
-                }
 
-                return seriesList.ToArray();
+                    var seriesJson = json["Search"];
+                    if (seriesJson == null)
+                    {
+                        throw new Exception("No se encontraron series en la respuesta de la API.");
+                    }
+
+                    var seriesList = new List<SerieDto>();
+                    foreach (var serie in seriesJson)
+                    {
+                        var serieId = serie["imdbID"]?.ToString();
+                        var serieDetails = await ObtenerDetallesSerieAsync(serieId);
+
+                        if (serieDetails != null)
+                        {
+                            seriesList.Add(serieDetails);
+                        }
+                    }
+
+                    return seriesList.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Excepción en ObtenerSeriesDesdeOmdbAsync: " + ex.Message, ex);
             }
         }
 
@@ -152,48 +149,44 @@ namespace SerializedStalker.Series
             }
         }
 
-
         private async Task<SerieDto> ObtenerDetallesSerieAsync(string imdbId)
         {
             var url = $"{BaseUrl}?apikey={ApiKey}&i={imdbId}";
 
-            // Inicializar el monitoreo del tiempo
-            var monitoreo = new MonitoreoApi
+            try
             {
-                HoraEntrada = DateTime.Now // Registrar la hora de entrada
-            };
-
-            using (var httpClient = new HttpClient())
-            {
-                var response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                monitoreo.HoraSalida = DateTime.Now; // Registrar la hora de salida
-
-                // Aquí podemos agregar el código para almacenar o procesar el monitoreo, si es necesario.
-
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var json = JObject.Parse(jsonResponse);
-
-                return new SerieDto
+                using (var httpClient = new HttpClient())
                 {
-                    Titulo = json["Title"]?.ToString(),
-                    Clasificacion = json["Rated"]?.ToString(),
-                    FechaEstreno = json["Released"]?.ToString(),
-                    Duracion = json["Runtime"]?.ToString(),
-                    Generos = json["Genre"]?.ToString(),
-                    Directores = json["Director"]?.ToString(),
-                    Escritores = json["Writer"]?.ToString(),
-                    Actores = json["Actors"]?.ToString(),
-                    Sinopsis = json["Plot"]?.ToString(),
-                    Idiomas = json["Language"]?.ToString(),
-                    Pais = json["Country"]?.ToString(),
-                    Poster = json["Poster"]?.ToString(),
-                    ImdbPuntuacion = json["imdbRating"]?.ToString(),
-                    ImdbVotos = int.TryParse(json["imdbVotes"]?.ToString().Replace(",", ""), out var votes) ? votes : 0,
-                    Tipo = json["Type"]?.ToString(),
-                    TotalTemporadas = int.TryParse(json["totalSeasons"]?.ToString(), out var seasons) ? seasons : 0
-                };
+                    var response = await httpClient.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var json = JObject.Parse(jsonResponse);
+
+                    return new SerieDto
+                    {
+                        Titulo = json["Title"]?.ToString(),
+                        Clasificacion = json["Rated"]?.ToString(),
+                        FechaEstreno = json["Released"]?.ToString(),
+                        Duracion = json["Runtime"]?.ToString(),
+                        Generos = json["Genre"]?.ToString(),
+                        Directores = json["Director"]?.ToString(),
+                        Escritores = json["Writer"]?.ToString(),
+                        Actores = json["Actors"]?.ToString(),
+                        Sinopsis = json["Plot"]?.ToString(),
+                        Idiomas = json["Language"]?.ToString(),
+                        Pais = json["Country"]?.ToString(),
+                        Poster = json["Poster"]?.ToString(),
+                        ImdbPuntuacion = json["imdbRating"]?.ToString(),
+                        ImdbVotos = int.TryParse(json["imdbVotes"]?.ToString().Replace(",", ""), out var votes) ? votes : 0,
+                        Tipo = json["Type"]?.ToString(),
+                        TotalTemporadas = int.TryParse(json["totalSeasons"]?.ToString(), out var seasons) ? seasons : 0
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Excepción en ObtenerDetallesSerieAsync: " + ex.Message, ex);
             }
         }
     }

@@ -56,6 +56,7 @@ public class SerializedStalkerDbContext :
 
     //Calificacion
     public DbSet<Calificacion> Calificaciones { get; set; }
+    public DbSet<MonitoreoApi> MonitoreosApi { get; set; }
 
 
     //Manejo de Usuarios
@@ -235,6 +236,18 @@ public class SerializedStalkerDbContext :
             b.Property(x => x.FechaCreacion).IsRequired();
             b.Property(x => x.SerieID).IsRequired();
             b.Property(x => x.UsuarioId).IsRequired(); // Configura la propiedad UsuarioId como requerida
+        });
+        //Monitoreo
+        builder.Entity<MonitoreoApi>(b =>
+        {
+            b.ToTable(SerializedStalkerConsts.DbTablePrefix + "MonitoreoApi",
+                SerializedStalkerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.HoraEntrada).IsRequired();
+            b.Property(x => x.HoraSalida).IsRequired();
+            b.Property(x => x.TiempoDuracion).IsRequired();
+            b.Property(x => x.Errores);
+
         });
         //builder.Entity<YourEntity>(b =>
         //{

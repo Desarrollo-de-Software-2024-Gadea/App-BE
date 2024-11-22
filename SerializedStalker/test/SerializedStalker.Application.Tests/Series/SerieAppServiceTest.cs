@@ -23,6 +23,7 @@ public class SerieAppServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<ISeriesApiService> _seriesApiServiceMock;
     private readonly Mock<IObjectMapper> _objectMapper;
+    private readonly Mock<IMonitoreoApiAppService> _monitoreoApiAppService;
     private readonly TestableSerieAppService _serieAppService;
 
     public SerieAppServiceTests()
@@ -31,6 +32,7 @@ public class SerieAppServiceTests
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _seriesApiServiceMock = new Mock<ISeriesApiService>();
         _objectMapper = new Mock<IObjectMapper>();
+        _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
 
       /*  var config = new MapperConfiguration(cfg =>
         {
@@ -44,7 +46,8 @@ public class SerieAppServiceTests
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
             _currentUserServiceMock.Object,
-            _objectMapper.Object
+            _objectMapper.Object,
+            _monitoreoApiAppService.Object
         );
     }
 
@@ -320,8 +323,9 @@ public class TestableSerieAppService : SerieAppService
         IRepository<Serie, int> serieRepository,
         ISeriesApiService seriesApiService,
         ICurrentUserService currentUserService,
-        IObjectMapper objectMapper)
-        : base(serieRepository, seriesApiService, currentUserService, objectMapper)
+        IObjectMapper objectMapper,
+        IMonitoreoApiAppService monitoreosApiService)
+        : base(serieRepository, seriesApiService, currentUserService, objectMapper, monitoreosApiService)
     {
       //  SetObjectMapper(objectMapper);
     }

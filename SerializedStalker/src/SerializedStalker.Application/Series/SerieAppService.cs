@@ -22,26 +22,68 @@ namespace SerializedStalker.Series
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IObjectMapper _objectMapper;
+        private readonly IMonitoreoApiAppService _monitoreoApiAppService;
 
 
-        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService, IObjectMapper objectMapper)
+        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService,
+            IObjectMapper objectMapper, IMonitoreoApiAppService monitoreoApiAppService)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _currentUserService = currentUserService;
             _objectMapper = objectMapper;
+            _monitoreoApiAppService = monitoreoApiAppService;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
-            return await _seriesApiService.BuscarSerieAsync(titulo, genero);
+            var monitoreo = new MonitoreoApiDto
+            {
+                HoraEntrada = DateTime.Now
+            };
+
+            try
+            {
+                var series = await _seriesApiService.BuscarSerieAsync(titulo, genero);
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                return series;
+            }
+            catch (Exception ex)
+            {
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
-        // Nuevo método para buscar temporadas
         public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada)
         {
-            return await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+            var monitoreo = new MonitoreoApiDto
+            {
+                HoraEntrada = DateTime.Now
+            };
+
+            try
+            {
+                var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                return temporada;
+            }
+            catch (Exception ex)
+            {
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
         public async Task CalificarSerieAsync(CalificacionDto input)

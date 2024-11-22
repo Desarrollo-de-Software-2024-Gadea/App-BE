@@ -23,5 +23,9 @@ public class SerializedStalkerApplicationAutoMapperProfile : Profile
         //Episodio
         CreateMap<Episodio, EpisodioDto>();
         CreateMap<EpisodioDto, Episodio>();
+
+        //Monitoreo
+        CreateMap<MonitoreoApiDto, MonitoreoApi>();
+
     }
 }
