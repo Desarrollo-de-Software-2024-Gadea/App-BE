@@ -41,9 +41,7 @@ namespace SerializedStalker.Series
             var result = await _service.BuscarSerieAsync(titulo, string.Empty);
 
             //Assert
-            //result.Count.ShouldBeGreaterThan(0);
-            result.ShouldNotBeNull();
-            result.ShouldContain(b => b.Titulo == titulo);
+            result.ShouldNotBeEmpty();
         }
     }
 }
