@@ -89,8 +89,11 @@ namespace SerializedStalker.Series
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
-        // Nuevo método para persistir las series en la base de datos
-        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+
+        //public async Task<TemporadaDto> ModificarCalificacionAsync(CalificacionDto input)
+        //{ }
+            // Nuevo método para persistir las series en la base de datos
+            public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
         {
             var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series //No esta devolviendo GetListAsync nada
 
