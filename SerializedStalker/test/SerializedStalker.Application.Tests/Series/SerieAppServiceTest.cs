@@ -43,6 +43,55 @@ public class SerieAppServiceTests
         );
     }
 
+    //Tests para buscar serie
+
+    /// <summary>
+    /// Verifica que el método <c>BuscarSerieAsync</c> retorne una lista de series 
+    /// cuando existen series que coinciden con el título y género proporcionados.
+    /// </summary>
+    [Fact]
+    public async Task BuscarSerieAsync_ShouldReturnSeries_WhenSeriesExist()
+    {
+        // Arrange
+        var titulo = "Test Title";
+        var genero = "Test Genre";
+        var series = new SerieDto[] { new SerieDto { Id = 1, Titulo = titulo } };
+
+        _seriesApiServiceMock.Setup(s => s.BuscarSerieAsync(titulo, genero))
+            .ReturnsAsync(series);
+
+        // Act
+        var result = await _serieAppService.BuscarSerieAsync(titulo, genero);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Equal(titulo, result[0].Titulo);
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>BuscarTemporadaAsync</c> retorne una temporada 
+    /// cuando existe una temporada que coincide con el ID de IMDb y el número de temporada proporcionados.
+    /// </summary>
+    [Fact]
+    public async Task BuscarTemporadaAsync_ShouldReturnTemporada_WhenTemporadaExists()
+    {
+        // Arrange
+        var imdbId = "tt1234567";
+        var numeroTemporada = 1;
+        var temporada = new TemporadaDto { NumeroTemporada = numeroTemporada };
+
+        _seriesApiServiceMock.Setup(s => s.BuscarTemporadaAsync(imdbId, numeroTemporada))
+            .ReturnsAsync(temporada);
+
+        // Act
+        var result = await _serieAppService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(numeroTemporada, result.NumeroTemporada);
+    }
+
     //Tests para calificar serie
 
     /// <summary>
