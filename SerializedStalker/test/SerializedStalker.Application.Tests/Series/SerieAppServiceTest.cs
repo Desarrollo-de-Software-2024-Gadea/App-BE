@@ -24,7 +24,7 @@ public class SerieAppServiceTests
     private readonly Mock<ISeriesApiService> _seriesApiServiceMock;
     private readonly Mock<IObjectMapper> _objectMapper;
     private readonly Mock<IMonitoreoApiAppService> _monitoreoApiAppService;
-    private readonly TestableSerieAppService _serieAppService;
+    private readonly SerieAppService _serieAppService;
 
     public SerieAppServiceTests()
     {
@@ -34,15 +34,7 @@ public class SerieAppServiceTests
         _objectMapper = new Mock<IObjectMapper>();
         _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
 
-      /*  var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<SerieDto, Serie>();
-            cfg.CreateMap<TemporadaDto, Temporada>();
-        });*/
-
-        //   _objectMapper = config.CreateMapper();
-
-        _serieAppService = new TestableSerieAppService(
+        _serieAppService = new SerieAppService(
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
             _currentUserServiceMock.Object,
@@ -51,6 +43,12 @@ public class SerieAppServiceTests
         );
     }
 
+    //Tests para calificar serie
+
+    /// <summary>
+    /// Verifica que el método <c>CalificarSerieAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
+    /// cuando el usuario ya ha calificado la serie.
+    /// </summary>
     [Fact]
     public async Task CalificarSerieAsync_ShouldThrowException_WhenUserAlreadyRated()
     {
@@ -62,9 +60,9 @@ public class SerieAppServiceTests
             // No se puede establecer el Id directamente, así que lo omitimos
             CreatorId = userId,
             Calificaciones = new List<Calificacion>
-            {
-                new Calificacion { UsuarioId = userId }
-            }
+        {
+            new Calificacion { UsuarioId = userId }
+        }
         };
 
         _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
@@ -81,6 +79,10 @@ public class SerieAppServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.CalificarSerieAsync(calificacionDto));
     }
 
+    /// <summary>
+    /// Verifica que el método <c>CalificarSerieAsync</c> agregue una nueva calificación 
+    /// cuando el usuario no ha calificado la serie previamente.
+    /// </summary>
     [Fact]
     public async Task CalificarSerieAsync_ShouldAddCalificacion_WhenUserHasNotRated()
     {
@@ -111,7 +113,77 @@ public class SerieAppServiceTests
         _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.Calificaciones.Count == 1), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifica que el método <c>CalificarSerieAsync</c> agregue una nueva calificación 
+    /// cuando el usuario no ha calificado la serie previamente (prueba de integración).
+    /// </summary>
+    [Fact]
+    public async Task CalificarSerieAsync_ShouldAddCalificacion_WhenUserHasNotRated_Integration()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var serieId = 1;
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion>()
+        };
+
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = serieId,
+            calificacion = 5,
+            comentario = "Last thing you will ever watch."
+        };
+
+        // Act
+        await _serieAppService.CalificarSerieAsync(calificacionDto);
+
+        // Assert
+        _serieRepositoryMock.Verify(r => r.UpdateAsync(It.Is<Serie>(s => s.Calificaciones.Count == 1), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    /// <summary>
+    /// Verifica que el método <c>CalificarSerieAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
+    /// cuando el usuario ya ha calificado la serie (prueba de integración).
+    /// </summary>
+    [Fact]
+    public async Task CalificarSerieAsync_ShouldThrowException_WhenUserAlreadyRated_Integration()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var serieId = 1;
+        var serie = new Serie
+        {
+            CreatorId = userId,
+            Calificaciones = new List<Calificacion>
+        {
+            new Calificacion { UsuarioId = userId, calificacion = 5, comentario = "Great series!" }
+        }
+        };
+
+        _currentUserServiceMock.Setup(s => s.GetCurrentUserId()).Returns(userId);
+        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+
+        var calificacionDto = new CalificacionDto
+        {
+            SerieID = serieId,
+            calificacion = 5,
+            comentario = "Lorem ipsum!"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.CalificarSerieAsync(calificacionDto));
+    }
+
     //Tests para persistir serie
+
+    /// <summary>
+    /// Verifica que el método <c>PersistirSeriesAsync</c> inserte una nueva serie cuando la serie no existe en el repositorio.
+    /// </summary>
     [Fact]
     public async Task PersistirSeriesAsync_ShouldInsertNewSerie_WhenSerieDoesNotExist()
     {
@@ -148,6 +220,10 @@ public class SerieAppServiceTests
         _serieRepositoryMock.Verify(r => r.InsertAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3 && s.CreatorId == userId), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifica que el método <c>PersistirSeriesAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
+    /// cuando el método <c>GetListAsync</c> del repositorio retorna null.
+    /// </summary>
     [Fact]
     public async Task PersistirSeriesAsync_ShouldThrowException_WhenGetListAsyncReturnsNull()
     {
@@ -315,29 +391,5 @@ public class SerieAppServiceTests
     }
 
 }
-
-// Clase derivada para tests
-public class TestableSerieAppService : SerieAppService
-{
-    public TestableSerieAppService(
-        IRepository<Serie, int> serieRepository,
-        ISeriesApiService seriesApiService,
-        ICurrentUserService currentUserService,
-        IObjectMapper objectMapper,
-        IMonitoreoApiAppService monitoreosApiService)
-        : base(serieRepository, seriesApiService, currentUserService, objectMapper, monitoreosApiService)
-    {
-      //  SetObjectMapper(objectMapper);
-    }
-
-    /*protected void SetObjectMapper(IMapper objectMapper)
-    {
-        typeof(ApplicationService).GetProperty("ObjectMapper", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(this, objectMapper);
-    }*/
-}
-
-
-
 
 
