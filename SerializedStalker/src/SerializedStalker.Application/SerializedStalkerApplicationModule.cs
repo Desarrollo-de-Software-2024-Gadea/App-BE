@@ -24,6 +24,9 @@ namespace SerializedStalker
             context.Services.AddHostedService<SerieUpdateChecker>();
 
             context.Services.AddTransient<ISeriesApiService, OmdbService>();
+
+            // Registrar el servicio de MonitoreoApiAppService
+            context.Services.AddTransient<IMonitoreoApiAppService, MonitoreoApiAppService>();
         }
     }
 }
