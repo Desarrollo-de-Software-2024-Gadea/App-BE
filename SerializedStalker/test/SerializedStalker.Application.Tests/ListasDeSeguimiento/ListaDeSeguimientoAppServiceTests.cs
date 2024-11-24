@@ -25,8 +25,13 @@ namespace SerializedStalker.ListasDeSeguimiento
             _listaDeSeguimientoAppService = GetRequiredService<IListaDeSeguimientoAppService>();
             _dbContext = GetRequiredService<SerializedStalkerDbContext>();
         }
+
+        /// <summary>
+        /// Verifica que el método <c>MostrarSeriesAsync</c> retorne una lista de series no vacía
+        /// cuando se llama desde la lista de seguimiento del usuario actual.
+        /// </summary>
         [Fact]
-        public async Task Should_Show_Series_Of_The_List()
+        public async Task MostrarSeriesAsync_Should_Show_Series_Of_The_List()
         {
             //Act
             var seriesDto = await _listaDeSeguimientoAppService.MostrarSeriesAsync();
@@ -35,8 +40,13 @@ namespace SerializedStalker.ListasDeSeguimiento
             Assert.NotEmpty(seriesDto);
             //.FirstOrDefault(s => s.ImdbIdentificator == "tt1234567"); //Falso positivo
         }
+
+        /// <summary>
+        /// Verifica que el método <c>EliminarSerieAsync</c> elimine correctamente una serie de la lista de seguimiento
+        /// y que la lista de series esté vacía después de la eliminación.
+        /// </summary>
         [Fact]
-        public async Task Should_Erase_One_Serie()
+        public async Task EliminarSerieAsync_Should_Erase_One_Serie()
         {
             //Act
             await _listaDeSeguimientoAppService.EliminarSerieAsync("tt1234567");
@@ -45,8 +55,13 @@ namespace SerializedStalker.ListasDeSeguimiento
             //Assert
             seriesDto.ShouldBeEmpty();
         }
+
+        /// <summary>
+        /// Verifica que el método <c>AddSerieAsync</c> agregue correctamente una nueva serie a la lista de seguimiento
+        /// y que la serie agregada esté presente en la base de datos con los datos correctos.
+        /// </summary>
         [Fact]
-        public async Task Should_Add_One_Serie()
+        public async Task AddSerieAsync_Should_Add_One_Serie()
         {
             //Act
             var serieDto = new SerieDto

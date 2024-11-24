@@ -17,6 +17,7 @@ namespace SerializedStalker
     {
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
+        private readonly IRepository<MonitoreoApi, int> _monitoreoApiRepository;
         private readonly ICurrentTenant _currentTenant;
         private readonly SerializedStalkerDbContext _context;
         private readonly ILogger<SerializedStalkerTestDataSeedContributor> _logger;
@@ -24,12 +25,14 @@ namespace SerializedStalker
 
         public SerializedStalkerTestDataSeedContributor(
             IRepository<Serie, int> serieRepository, 
-            IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository, 
+            IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
+            IRepository<MonitoreoApi, int> monitoreoApiRepository,
             ICurrentTenant currentTenant, SerializedStalkerDbContext context, 
             ILogger<SerializedStalkerTestDataSeedContributor> logger)
         {
             _serieRepository = serieRepository;
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
+            _monitoreoApiRepository = monitoreoApiRepository;
             _currentTenant = currentTenant;
             _context = context;
             _logger = logger;
@@ -44,7 +47,6 @@ namespace SerializedStalker
                 {
                     return; // Datos ya sembrados
                 }
-
 
                 var serie = new Serie
                 {
@@ -76,7 +78,14 @@ namespace SerializedStalker
                 listaDeSeguimientoSEED.Series.Add(serie);
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimientoSEED); //No esta utilizando lo creado por el SEEDer
                 //await _context.SaveChangesAsync();
-
+                var monitoreoSEED = new MonitoreoApi
+                {
+                    HoraEntrada = DateTime.Now,
+                    HoraSalida = DateTime.Now.AddSeconds(20),
+                    TiempoDuracion = 20,
+                    Errores = new List<string> { "Error de prueba" }
+                };
+                await _monitoreoApiRepository.InsertAsync(monitoreoSEED);
                 //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
            

@@ -1,4 +1,5 @@
-﻿using SerializedStalker.Samples;
+﻿using SerializedStalker.ListasDeSeguimiento;
+using SerializedStalker.Series;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,8 @@ using Xunit;
 
 namespace SerializedStalker.EntityFrameworkCore.Applications.Series
 {
-    
     [Collection(SerializedStalkerTestConsts.CollectionDefinitionName)]
-    public class EfCoreSerieAppServiceIntegrationTests : SerieAppServiceIntegrationTests<SerializedStalkerEntityFrameworkCoreTestModule>
+    public class EfCoreMonitoreoApiAppServiceIntegrationTests : MonitoreoApiAppServiceTest<SerializedStalkerEntityFrameworkCoreTestModule>
     {
 
     }

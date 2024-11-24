@@ -36,6 +36,13 @@ namespace SerializedStalker.ListasDeSeguimiento
             _service = service;
             _serieAppService = serieAppService;
         }
+
+        /// <summary>
+        /// Agrega una serie a la lista de seguimiento del usuario actual.
+        /// </summary>
+        /// <param name="serieDto">El objeto SerieDto que contiene la información de la serie a agregar.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <exception cref="Exception">Se lanza una excepción si la serie ya está en la lista de seguimiento.</exception>
         public async Task AddSerieAsync(SerieDto serieDto)
         {
             //Debemos agregar una forma de que se extraiga solo la lista del usuario actual.
@@ -72,6 +79,12 @@ namespace SerializedStalker.ListasDeSeguimiento
             // Actualiza la lista de seguimiento en la base de datos
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
          }
+
+        /// <summary>
+        /// Muestra todas las series en la lista de seguimiento del usuario actual.
+        /// </summary>
+        /// <returns>Un array de objetos SerieDto que representan las series en la lista de seguimiento.</returns>
+        /// <exception cref="Exception">Se lanza una excepción si no hay series en la lista de seguimiento.</exception>
         public async Task<SerieDto[]> MostrarSeriesAsync()
         {
             //var userEnt = _currentUser;
@@ -93,7 +106,12 @@ namespace SerializedStalker.ListasDeSeguimiento
             return  ObjectMapper.Map< Serie[], SerieDto[]>(listaDeSeguimiento.Series.ToArray());            
         }
 
-
+        /// <summary>
+        /// Elimina una serie de la lista de seguimiento del usuario actual.
+        /// </summary>
+        /// <param name="ImdbID">El identificador de IMDb de la serie a eliminar.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <exception cref="Exception">Se lanza una excepción si la lista de seguimiento no existe o si la serie no está en la lista de seguimiento.</exception>
         public async Task EliminarSerieAsync(string ImdbID)
         {
             //var userEnt = _currentUser;
@@ -127,9 +145,3 @@ namespace SerializedStalker.ListasDeSeguimiento
         }
     }
 }
-
-/*
-Como la idea del profe es que las series se persistan por separado, 
-debemos buscar la serie en la api y ahí persistirla, para luego agregarla a la lista de seguimiento.
-Debemos tambien tener en cuenta el usuario que la agrega a su lista así lo ponemos en la serie.
-*/

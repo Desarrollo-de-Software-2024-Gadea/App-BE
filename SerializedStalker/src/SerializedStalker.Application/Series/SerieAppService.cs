@@ -22,28 +22,96 @@ namespace SerializedStalker.Series
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IObjectMapper _objectMapper;
+        private readonly IMonitoreoApiAppService _monitoreoApiAppService;
 
 
-        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService, IObjectMapper objectMapper)
+        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService,
+            IObjectMapper objectMapper, IMonitoreoApiAppService monitoreoApiAppService)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _currentUserService = currentUserService;
             _objectMapper = objectMapper;
+            _monitoreoApiAppService = monitoreoApiAppService;
         }
 
+        // Métodos de búsqueda
+
+        /// <summary>
+        /// Busca series por título y opcionalmente por género utilizando el servicio de API de series.
+        /// </summary>
+        /// <param name="titulo">El título de la serie a buscar.</param>
+        /// <param name="genero">El género de la serie a buscar (opcional).</param>
+        /// <returns>Un array de objetos SerieDto que coinciden con los criterios de búsqueda.</returns>
+        /// <exception cref="Exception">Lanzada si ocurre un error durante la búsqueda de series.</exception>
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
-            return await _seriesApiService.BuscarSerieAsync(titulo, genero);
+            var monitoreo = new MonitoreoApiDto
+            {
+                HoraEntrada = DateTime.Now
+            };
+
+            try
+            {
+                var series = await _seriesApiService.BuscarSerieAsync(titulo, genero);
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                return series;
+            }
+            catch (Exception ex)
+            {
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
-        // Nuevo método para buscar temporadas
+        /// <summary>
+        /// Busca una temporada específica de una serie utilizando el identificador IMDb y el número de temporada.
+        /// </summary>
+        /// <param name="imdbId">El identificador IMDb de la serie.</param>
+        /// <param name="numeroTemporada">El número de la temporada a buscar.</param>
+        /// <returns>Un objeto TemporadaDto que representa la temporada buscada.</returns>
+        /// <exception cref="Exception">Lanzada si ocurre un error durante la búsqueda de la temporada.</exception>
         public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada)
         {
-            return await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+            var monitoreo = new MonitoreoApiDto
+            {
+                HoraEntrada = DateTime.Now
+            };
+
+            try
+            {
+                var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                return temporada;
+            }
+            catch (Exception ex)
+            {
+                monitoreo.HoraSalida = DateTime.Now;
+                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
+        // Métodos de calificación
+
+        /// <summary>
+        /// Permite a un usuario calificar una serie.
+        /// </summary>
+        /// <param name="input">Un objeto CalificacionDto que contiene la calificación y el comentario del usuario.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <exception cref="EntityNotFoundException">Lanzada si la serie no se encuentra en el repositorio.</exception>
+        /// <exception cref="InvalidOperationException">Lanzada si el ID del usuario actual es nulo o si el usuario ya ha calificado la serie.</exception>
+        /// <exception cref="UnauthorizedAccessException">Lanzada si el usuario intenta calificar una serie que no le pertenece.</exception>
         public async Task CalificarSerieAsync(CalificacionDto input)
         {
             // Obtener la serie del repositorio
@@ -89,6 +157,16 @@ namespace SerializedStalker.Series
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
         }
+
+        /// <summary>
+        /// Permite a un usuario modificar su calificación existente de una serie.
+        /// </summary>
+        /// <param name="input">Un objeto CalificacionDto que contiene la nueva calificación y el comentario del usuario.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <exception cref="ArgumentNullException">Lanzada si el objeto input es nulo.</exception>
+        /// <exception cref="EntityNotFoundException">Lanzada si la serie no se encuentra en el repositorio.</exception>
+        /// <exception cref="InvalidOperationException">Lanzada si el ID del usuario actual es nulo o si no hay una calificación existente para modificar.</exception>
+        /// <exception cref="UnauthorizedAccessException">Lanzada si el usuario intenta modificar una calificación de una serie que no le pertenece.</exception>
         public async Task ModificarCalificacionAsync(CalificacionDto input)
         {
             if (input == null)
@@ -133,7 +211,14 @@ namespace SerializedStalker.Series
             await _serieRepository.UpdateAsync(serie);
         }
 
-        // Nuevo método para persistir las series en la base de datos
+        // Métodos de persistencia
+
+        /// <summary>
+        /// Persiste una lista de series en la base de datos.
+        /// </summary>
+        /// <param name="seriesDto">Un array de objetos SerieDto que representan las series a persistir.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <exception cref="InvalidOperationException">Lanzada si el ID del usuario actual es nulo o si el identificador IMDb de una serie es nulo.</exception>
         public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
         {
             // Obtener todas las series existentes

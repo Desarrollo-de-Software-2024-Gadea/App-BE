@@ -32,16 +32,21 @@ namespace SerializedStalker.Series
             result.ShouldNotBeNull();
             result.ShouldContain(b => b.Titulo == titulo);
         }
+
         [Fact]
         public async Task Serie_No_Existente()
         {
             //arrange
             var titulo = "IGJEMGIDSAJ8faunefag2681";
-            //Act
-            var result = await _service.BuscarSerieAsync(titulo, string.Empty);
 
-            //Assert
-            result.ShouldNotBeEmpty();
+            //Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _service.BuscarSerieAsync(titulo, string.Empty);
+            });
+
+            // Verificar que el mensaje de la excepción es el esperado
+            exception.Message.ShouldContain("Error en la respuesta de la API");
         }
     }
 }
