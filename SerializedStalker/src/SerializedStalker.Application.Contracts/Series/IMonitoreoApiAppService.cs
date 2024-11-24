@@ -11,5 +11,6 @@ namespace SerializedStalker.Series
     public interface IMonitoreoApiAppService: IApplicationService
     {
         Task PersistirMonitoreoAsync(MonitoreoApiDto monitoreoDto);
+        Task<MonitoreoApiDto[]> MostrarMonitoreosAsync();
     }
 }

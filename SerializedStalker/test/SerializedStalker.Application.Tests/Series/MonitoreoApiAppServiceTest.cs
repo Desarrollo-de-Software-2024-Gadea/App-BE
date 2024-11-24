@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper.Internal.Mappers;
 using Microsoft.EntityFrameworkCore;
 using SerializedStalker.EntityFrameworkCore;
 using SerializedStalker.Series;
@@ -52,9 +53,21 @@ namespace SerializedStalker.Series
 
             // Assert
             var monitoreoEnDb = await _dbContext.MonitoreosApi
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(m => m.TiempoDuracion == 60);
 
             monitoreoEnDb.ShouldNotBeNull(); // Verifica que el monitoreo fue guardado
+            monitoreoEnDb.TiempoDuracion.ShouldBe(60); // Verifica que los datos coinciden
+
+        }
+        [Fact]
+        public async Task MostrarMonitoreosAsync_Should_Show_Monitoreos()
+        {
+            //Act
+            var monitoreoApiDto = await _monitoreoApiAppService.MostrarMonitoreosAsync();
+
+            //Assert
+            Assert.NotEmpty(monitoreoApiDto);
+            //.FirstOrDefault(s => s.ImdbIdentificator == "tt1234567"); //Falso positivo
         }
     }
 }
