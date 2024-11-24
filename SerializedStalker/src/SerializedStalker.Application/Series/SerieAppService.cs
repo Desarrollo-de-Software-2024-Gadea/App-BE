@@ -295,5 +295,18 @@ namespace SerializedStalker.Series
                 }
             }
         }
+        public async Task<SerieDto[]> ObtenerSeriesAsync()
+        {
+            //Obtenemos las series del Repositorio
+            var series = await _serieRepository.GetListAsync();
+
+            // Si no hay series da una excepción
+            if (series == null)
+            {
+                throw new Exception("No hay series Persistidas.");
+            }
+
+            return _objectMapper.Map<Serie[], SerieDto[]>(series.ToArray());
+        }
     }
 }

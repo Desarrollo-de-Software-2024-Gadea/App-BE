@@ -14,6 +14,7 @@ namespace SerializedStalker.Series
         Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada);
         Task CalificarSerieAsync(CalificacionDto input);
         Task PersistirSeriesAsync(SerieDto[] seriesDto);
+        Task<SerieDto[]> ObtenerSeriesAsync();
     }
 }
 

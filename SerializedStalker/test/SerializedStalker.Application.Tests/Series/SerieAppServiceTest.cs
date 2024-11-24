@@ -438,6 +438,39 @@ public class SerieAppServiceTests
         Assert.Equal(calificacionDto.comentario, calificacionExistente.comentario);
         _serieRepositoryMock.Verify(r => r.UpdateAsync(serie, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+    [Fact]
+    public async Task ObtenerSeriesAsync_Should_Show_Series()
+    {
+        // Arrange
+        var serieId = 1;
+        var serie = new Serie
+        {
+            Titulo = "Neo Test Serie",
+            Clasificacion = "PG-99",
+            FechaEstreno = "2000-01-01",
+            Duracion = "1h",
+            Generos = "Drama",
+            Directores = "Director Test",
+            Escritores = "Writer Test",
+            Actores = "Actor Test",
+            Sinopsis = "Neo Test Sinopsis",
+            Idiomas = "Español",
+            Pais = "Finlandia",
+            Poster = "URL del poster",
+            ImdbPuntuacion = "8.5",
+            ImdbVotos = 1000,
+            ImdbIdentificator = "tt1234567",
+            Tipo = "Serie",
+        };
+        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
+
+
+        //Act
+        var seriesDto = await _serieAppService.ObtenerSeriesAsync();
+
+        //Assert
+        Assert.NotEmpty(seriesDto);
+    }
 
 }
 
