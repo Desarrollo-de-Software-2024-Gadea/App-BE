@@ -78,17 +78,36 @@ namespace SerializedStalker
                 listaDeSeguimientoSEED.Series.Add(serie);
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimientoSEED); //No esta utilizando lo creado por el SEEDer
                 //await _context.SaveChangesAsync();
-                var monitoreoSEED = new MonitoreoApi
+                var monitoreoSEED1 = new MonitoreoApi
                 {
                     HoraEntrada = DateTime.Now,
                     HoraSalida = DateTime.Now.AddSeconds(20),
                     TiempoDuracion = 20,
-                    Errores = new List<string> { "Error de prueba" }
+                    Errores = new List<string> { "Error 7" }
                 };
-                await _monitoreoApiRepository.InsertAsync(monitoreoSEED);
+                await _monitoreoApiRepository.InsertAsync(monitoreoSEED1);
+
+                var monitoreoSEED2 = new MonitoreoApi
+                {
+                    HoraEntrada = DateTime.Now,
+                    HoraSalida = DateTime.Now.AddMinutes(30),
+                    TiempoDuracion = 30,
+                    Errores = new List<string> { "Error 1" }
+                };
+                await _monitoreoApiRepository.InsertAsync(monitoreoSEED2);
+
+                var monitoreoSEED3 = new MonitoreoApi
+                {
+                    HoraEntrada = DateTime.Now,
+                    HoraSalida = DateTime.Now.AddMinutes(45),
+                    TiempoDuracion = 45,
+                    Errores = new List<string> { "Error 2", "Error 3" }
+                };
+                await _monitoreoApiRepository.InsertAsync(monitoreoSEED3);
+
                 //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }
-           
+
         }
     }   
 }

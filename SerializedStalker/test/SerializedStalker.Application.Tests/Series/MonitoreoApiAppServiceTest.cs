@@ -35,7 +35,6 @@ namespace SerializedStalker.Series
         /// Esta prueba crea una instancia de MonitoreoApiDto con datos de prueba, llama al método PersistirMonitoreoAsync
         /// y luego verifica que el objeto MonitoreoApi correspondiente ha sido guardado en la base de datos.
         /// </remarks>
-        /// <returns>Una tarea que representa la operación asincrónica.</returns>
         [Fact]
         public async Task PersistirMonitoreoAsync_Should_Call_InsertAsync()
         {
@@ -60,6 +59,14 @@ namespace SerializedStalker.Series
 
         }
 
+        /// <summary>
+        /// Prueba unitaria para verificar que el método MostrarMonitoreosAsync de MonitoreoApiAppService
+        /// retorna una lista de monitoreos almacenados en la base de datos.
+        /// </summary>
+        /// <remarks>
+        /// Esta prueba llama al método MostrarMonitoreosAsync y verifica que la lista de monitoreos
+        /// retornada no esté vacía.
+        /// </remarks>
         [Fact]
         public async Task MostrarMonitoreosAsync_Should_Show_Monitoreos()
         {
@@ -69,6 +76,31 @@ namespace SerializedStalker.Series
             //Assert
             Assert.NotEmpty(monitoreoApiDto);
             //.FirstOrDefault(s => s.ImdbIdentificator == "tt1234567"); //Falso positivo
+        }
+
+        /// <summary>
+        /// Prueba unitaria para verificar que el método ObtenerEstadisticasAsync de MonitoreoApiAppService
+        /// calcula correctamente las estadísticas de los monitoreos almacenados en la base de datos.
+        /// </summary>
+        /// <remarks>
+        /// Esta prueba llama al método ObtenerEstadisticasAsync y verifica que las estadísticas calculadas
+        /// (total de monitoreos, promedio de duración y total de errores) sean correctas según los datos
+        /// de prueba proporcionados.
+        /// </remarks>
+        [Fact]
+        public async Task ObtenerEstadisticasAsync_Should_Calculate_Statistics_Correctly()
+        {
+
+            // Act
+            var estadisticas = await _monitoreoApiAppService.ObtenerEstadisticasAsync();
+
+            // Assert
+
+            //Esto es por los datos colocados enel seeder
+            estadisticas.ShouldNotBeNull();
+            estadisticas.TotalMonitoreos.ShouldBe(3);
+            estadisticas.PromedioDuracion.ShouldBe(31, 666666f); 
+            estadisticas.TotalErrores.ShouldBe(4); 
         }
     }
 }
