@@ -295,5 +295,24 @@ namespace SerializedStalker.Series
                 }
             }
         }
+
+        /// <summary>
+        /// Obtiene todas las series almacenadas en el repositorio.
+        /// </summary>
+        /// <returns>Un arreglo de objetos <see cref="SerieDto"/> que representan las series almacenadas.</returns>
+        /// <exception cref="Exception">Lanzada cuando no hay series persistidas en el repositorio.</exception>
+        public async Task<SerieDto[]> ObtenerSeriesAsync()
+        {
+            //Obtenemos las series del Repositorio
+            var series = await _serieRepository.GetListAsync();
+
+            // Si no hay series da una excepción
+            if (series == null)
+            {
+                throw new Exception("No hay series Persistidas.");
+            }
+
+            return _objectMapper.Map<Serie[], SerieDto[]>(series.ToArray());
+        }
     }
 }

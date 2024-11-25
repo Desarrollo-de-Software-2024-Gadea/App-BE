@@ -34,7 +34,7 @@ namespace SerializedStalker.Series
             //Obtenemos los monitoreos del Repositorio (No estoy 100% seguro de que esto funcione)
             var monitoreos = await _monitoreoApiRepository.GetListAsync();
 
-            // Si no existe, crea una nueva lista de seguimiento
+            // Si no hay monitoreos da una excepción
             if (monitoreos == null)
             {
                 throw new Exception("No hay Monitoreos Registrados.");
