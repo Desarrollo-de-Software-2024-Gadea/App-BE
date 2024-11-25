@@ -1,1 +1,10 @@
-<p>monitoreos works!</p>
+<h2>Buscar Series</h2>
+<form (ngSubmit)="mostrarMonitoreosEnBD()"></form>
+<ngx-datatable *ngIf="monitoreos.length" class="bootstrap" [rows]="series" [columnMode]="'force'" [headerHeight]="50"
+    [footerHeight]="50" [rowHeight]="'auto'">
+    <ngx-datatable-column name="Hora de Inicio" prop="HoraEntrada"></ngx-datatable-column>
+    <ngx-datatable-column name="Hora de Salida" prop="HoraSalida"></ngx-datatable-column>
+    <ngx-datatable-column name="Duración" prop="TiempoDuracion"></ngx-datatable-column>
+    <ngx-datatable-column name="Duración" prop="TiempoDuracion"></ngx-datatable-column>
+    <ngx-datatable-column name="Errores" prop="Errores"></ngx-datatable-column>
+</ngx-datatable>
