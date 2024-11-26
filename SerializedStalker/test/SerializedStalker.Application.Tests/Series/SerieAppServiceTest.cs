@@ -4,6 +4,8 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using SerializedStalker.EntityFrameworkCore;
 using Moq;
 using NSubstitute;
 using SerializedStalker.Series;
@@ -15,6 +17,12 @@ using Volo.Abp.ObjectMapping;
 using Autofac.Core;
 using System.Linq;
 using Volo.Abp.Domain.Entities;
+using Shouldly;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Modularity;
+using Volo.Abp.Validation;
+using SerializedStalker;
+
 
 
 public class SerieAppServiceTests
@@ -33,7 +41,6 @@ public class SerieAppServiceTests
         _seriesApiServiceMock = new Mock<ISeriesApiService>();
         _objectMapper = new Mock<IObjectMapper>();
         _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
-
         _serieAppService = new SerieAppService(
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
@@ -43,12 +50,42 @@ public class SerieAppServiceTests
         );
     }
 
-    //Tests para buscar serie
+    //Tests de obtener series
 
     /// <summary>
-    /// Verifica que el método <c>BuscarSerieAsync</c> retorne una lista de series 
-    /// cuando existen series que coinciden con el título y género proporcionados.
+    /// Verifica que el método <c>ObtenerSeriesAsync</c> retorne una lista de series 
+    /// cuando existen series en el repositorio.
     /// </summary>
+    [Fact]
+    public async Task ObtenerSeriesAsync_ShouldReturnSeries_WhenSeriesExist()
+    {
+        // Arrange
+        var series = new List<Serie>
+    {
+        new Serie { Titulo = "Test Serie", Generos = "Drama", Sinopsis = "Una serie de prueba" }
+    };
+        var seriesDto = new List<SerieDto>
+    {
+        new SerieDto { Titulo = "Test Serie", Generos = "Drama", Sinopsis = "Una serie de prueba" }
+    };
+
+        _serieRepositoryMock.Setup(repo => repo.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(series);
+
+        _objectMapper.Setup(mapper => mapper.Map<Serie[], SerieDto[]>(It.IsAny<Serie[]>()))
+            .Returns(seriesDto.ToArray());
+
+        // Act
+        var result = await _serieAppService.ObtenerSeriesAsync();
+
+        // Assert
+        result.ShouldNotBeEmpty();
+        result.Length.ShouldBe(1);
+        result[0].Titulo.ShouldBe("Test Serie");
+        result[0].Generos.ShouldBe("Drama");
+        result[0].Sinopsis.ShouldBe("Una serie de prueba");
+    }
+
     [Fact]
     public async Task BuscarSerieAsync_ShouldReturnSeries_WhenSeriesExist()
     {
@@ -438,40 +475,4 @@ public class SerieAppServiceTests
         Assert.Equal(calificacionDto.comentario, calificacionExistente.comentario);
         _serieRepositoryMock.Verify(r => r.UpdateAsync(serie, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
-    [Fact]
-    public async Task ObtenerSeriesAsync_Should_Show_Series()
-    {
-        // Arrange
-        var serieId = 1;
-        var serie = new Serie
-        {
-            Titulo = "Neo Test Serie",
-            Clasificacion = "PG-99",
-            FechaEstreno = "2000-01-01",
-            Duracion = "1h",
-            Generos = "Drama",
-            Directores = "Director Test",
-            Escritores = "Writer Test",
-            Actores = "Actor Test",
-            Sinopsis = "Neo Test Sinopsis",
-            Idiomas = "Español",
-            Pais = "Finlandia",
-            Poster = "URL del poster",
-            ImdbPuntuacion = "8.5",
-            ImdbVotos = 1000,
-            ImdbIdentificator = "tt1234567",
-            Tipo = "Serie",
-        };
-        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
-
-
-        //Act
-        var seriesDto = await _serieAppService.ObtenerSeriesAsync();
-
-        //Assert
-        Assert.NotEmpty(seriesDto);
-    }
-
 }
-
-
