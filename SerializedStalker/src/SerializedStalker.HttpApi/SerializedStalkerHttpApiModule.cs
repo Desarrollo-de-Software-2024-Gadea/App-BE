@@ -8,34 +8,42 @@ using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement.HttpApi;
 using Volo.Abp.Localization;
 using Volo.Abp.TenantManagement;
+using Microsoft.Extensions.DependencyInjection;
+using SerializedStalker.Series; // Agrega esto para usar AddHttpClient
 
-namespace SerializedStalker;
-
- [DependsOn(
-    typeof(SerializedStalkerApplicationContractsModule),
-    typeof(AbpPermissionManagementHttpApiModule),
-    typeof(AbpSettingManagementHttpApiModule),
-    typeof(AbpAccountHttpApiModule),
-    typeof(AbpIdentityHttpApiModule),
-    typeof(AbpTenantManagementHttpApiModule),
-    typeof(AbpFeatureManagementHttpApiModule)
-    )]
-public class SerializedStalkerHttpApiModule : AbpModule
+namespace SerializedStalker
 {
-    public override void ConfigureServices(ServiceConfigurationContext context)
+    [DependsOn(
+        typeof(SerializedStalkerApplicationContractsModule),
+        typeof(AbpPermissionManagementHttpApiModule),
+        typeof(AbpSettingManagementHttpApiModule),
+        typeof(AbpAccountHttpApiModule),
+        typeof(AbpIdentityHttpApiModule),
+        typeof(AbpTenantManagementHttpApiModule),
+        typeof(AbpFeatureManagementHttpApiModule)
+    )]
+    public class SerializedStalkerHttpApiModule : AbpModule
     {
-        ConfigureLocalization();
-    }
-
-    private void ConfigureLocalization()
-    {
-        Configure<AbpLocalizationOptions>(options =>
+        public override void ConfigureServices(ServiceConfigurationContext context)
         {
-            options.Resources
-                .Get<SerializedStalkerResource>()
-                .AddBaseTypes(
-                    typeof(AbpUiResource)
-                );
-        });
+            var services = context.Services;
+
+            // Registrar HttpClient para OmdbService
+            services.AddHttpClient<OmdbService>();
+
+            ConfigureLocalization();
+        }
+
+        private void ConfigureLocalization()
+        {
+            Configure<AbpLocalizationOptions>(options =>
+            {
+                options.Resources
+                    .Get<SerializedStalkerResource>()
+                    .AddBaseTypes(
+                        typeof(AbpUiResource)
+                    );
+            });
+        }
     }
 }
