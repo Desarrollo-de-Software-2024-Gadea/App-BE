@@ -80,6 +80,14 @@ export class SerieService {
     { apiName: this.apiName,...config });
   
 
+  obtenerSeries = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, SerieDto[]>({
+      method: 'POST',
+      url: '/api/app/serie/obtener-series',
+    },
+    { apiName: this.apiName,...config });
+  
+
   persistirSeries = (seriesDto: SerieDto[], config?: Partial<Rest.Config>) =>
     this.restService.request<any, void>({
       method: 'POST',

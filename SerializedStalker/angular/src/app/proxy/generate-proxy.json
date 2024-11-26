@@ -1126,6 +1126,14 @@
                     "type": "SerializedStalker.Series.MonitoreoApiDto[]",
                     "typeSimple": "[SerializedStalker.Series.MonitoreoApiDto]"
                   }
+                },
+                {
+                  "name": "ObtenerEstadisticasAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "MonitoreoApiEstadisticasDto",
+                    "typeSimple": "MonitoreoApiEstadisticasDto"
+                  }
                 }
               ]
             }
@@ -1179,6 +1187,21 @@
               "returnValue": {
                 "type": "SerializedStalker.Series.MonitoreoApiDto[]",
                 "typeSimple": "[SerializedStalker.Series.MonitoreoApiDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SerializedStalker.Series.IMonitoreoApiAppService"
+            },
+            "ObtenerEstadisticasAsync": {
+              "uniqueName": "ObtenerEstadisticasAsync",
+              "name": "ObtenerEstadisticasAsync",
+              "httpMethod": "POST",
+              "url": "api/app/monitoreo-api/obtener-estadisticas",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "MonitoreoApiEstadisticasDto",
+                "typeSimple": "MonitoreoApiEstadisticasDto"
               },
               "allowAnonymous": null,
               "implementFrom": "SerializedStalker.Series.IMonitoreoApiAppService"
@@ -1279,6 +1302,14 @@
                   "returnValue": {
                     "type": "System.Void",
                     "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "ObtenerSeriesAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "SerializedStalker.Series.SerieDto[]",
+                    "typeSimple": "[SerializedStalker.Series.SerieDto]"
                   }
                 },
                 {
@@ -1599,6 +1630,21 @@
               "returnValue": {
                 "type": "System.Void",
                 "typeSimple": "System.Void"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SerializedStalker.Series.ISerieAppService"
+            },
+            "ObtenerSeriesAsync": {
+              "uniqueName": "ObtenerSeriesAsync",
+              "name": "ObtenerSeriesAsync",
+              "httpMethod": "POST",
+              "url": "api/app/serie/obtener-series",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "SerializedStalker.Series.SerieDto[]",
+                "typeSimple": "[SerializedStalker.Series.SerieDto]"
               },
               "allowAnonymous": null,
               "implementFrom": "SerializedStalker.Series.ISerieAppService"
@@ -4450,6 +4496,51 @@
       "enumValues": null,
       "genericArguments": null,
       "properties": []
+    },
+    "MonitoreoApiEstadisticasDto": {
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Int32>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "PromedioDuracion",
+          "jsonName": null,
+          "type": "System.Single",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalErrores",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalMonitoreos",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
     },
     "SerializedStalker.Series.CalificacionDto": {
       "baseType": null,

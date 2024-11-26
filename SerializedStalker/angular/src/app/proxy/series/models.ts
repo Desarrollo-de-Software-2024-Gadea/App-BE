@@ -75,3 +75,9 @@ export interface MonitoreoApiDto extends EntityDto<number> {
   tiempoDuracion: number;
   errores: string[];
 }
+
+export interface MonitoreoApiEstadisticasDto extends EntityDto<number> {
+  PromedioDuracion?: number;
+  TotalErrores?: number;
+  TotalMonitoreos?: number;
+}

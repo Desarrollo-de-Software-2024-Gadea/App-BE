@@ -1,4 +1,4 @@
-import type { MonitoreoApiDto } from './models';
+import type { MonitoreoApiDto,  MonitoreoApiEstadisticasDto} from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
@@ -13,6 +13,14 @@ export class MonitoreoApiService {
     this.restService.request<any, MonitoreoApiDto[]>({
       method: 'POST',
       url: '/api/app/monitoreo-api/mostrar-monitoreos',
+    },
+    { apiName: this.apiName,...config });
+  
+
+  obtenerEstadisticas = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, MonitoreoApiEstadisticasDto>({
+      method: 'POST',
+      url: '/api/app/monitoreo-api/obtener-estadisticas',
     },
     { apiName: this.apiName,...config });
   

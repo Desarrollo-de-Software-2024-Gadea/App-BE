@@ -1,21 +1,31 @@
-import { Component } from '@angular/core';
-import { MonitoreoApiDto, MonitoreoApiService } from '@proxy/series';
+import { Component, OnInit } from '@angular/core';
+import { MonitoreoApiDto, MonitoreoApiService, MonitoreoApiEstadisticasDto } from '@proxy/series';
 
 @Component({
   selector: 'app-monitoreos',
   templateUrl: './monitoreos.component.html',
-  styleUrl: './monitoreos.component.scss'
+  styleUrls: ['./monitoreos.component.scss']
 })
-export class MonitoreosComponent {
-  monitoreos = [] as MonitoreoApiDto[];
+export class MonitoreosComponent implements OnInit {
+  monitoreos: MonitoreoApiDto[] = [];
+  estadisticas: MonitoreoApiEstadisticasDto | null = null;
 
-  serieTitle: string = "";
+  constructor(private monitoreoService: MonitoreoApiService) {}
 
-  constructor(private monitoreoService: MonitoreoApiService) {
-
+  ngOnInit(): void {
+    this.mostrarMonitoreosEnBD();
+    this.mostrarEstadisticasMonitoreos();
   }
 
-  public mostrarMonitoreosEnBD() {    
-      this.monitoreoService.mostrarMonitoreos().subscribe(response => this.monitoreos = response || []);
+  public mostrarMonitoreosEnBD(): void {    
+    this.monitoreoService.mostrarMonitoreos().subscribe(response => {
+      this.monitoreos = response || [];
+    });
+  }
+
+  public mostrarEstadisticasMonitoreos(): void {    
+    this.monitoreoService.obtenerEstadisticas().subscribe(response => {
+      this.estadisticas = response || null;
+    });
   }
 }
