@@ -10,31 +10,39 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.ObjectMapping;
+using Microsoft.Extensions.Logging;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using static Volo.Abp.Identity.IdentityPermissions;
-
 
 namespace SerializedStalker.ListasDeSeguimiento
 {
     [Authorize]
     public class ListaDeSeguimientoAppService : ApplicationService, IListaDeSeguimientoAppService
     {
-        private readonly IRepository<ListaDeSeguimiento,int> _listaDeSeguimientoRepository;
+        private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUser _currentUser;
         private readonly OmdbService _service;
         private readonly SerieAppService _serieAppService;
         private readonly IObjectMapper _objectMapper;
+        private readonly ILogger<ListaDeSeguimientoAppService> _logger;
 
-        public ListaDeSeguimientoAppService(IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
-            IRepository<Serie, int> serieRepository, ICurrentUser currentUser, IObjectMapper objectMapper, OmdbService service, SerieAppService serieAppService)
-        { 
+        public ListaDeSeguimientoAppService(
+            IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
+            IRepository<Serie, int> serieRepository,
+            ICurrentUser currentUser,
+            IObjectMapper objectMapper,
+            OmdbService service,
+            SerieAppService serieAppService,
+            ILogger<ListaDeSeguimientoAppService> logger)
+        {
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _serieRepository = serieRepository;
             _currentUser = currentUser;
             _objectMapper = objectMapper;
             _service = service;
             _serieAppService = serieAppService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -45,12 +53,11 @@ namespace SerializedStalker.ListasDeSeguimiento
         /// <exception cref="Exception">Se lanza una excepción si la serie ya está en la lista de seguimiento.</exception>
         public async Task AddSerieAsync(SerieDto serieDto)
         {
-            //Debemos agregar una forma de que se extraiga solo la lista del usuario actual.
+            _logger.LogInformation("Iniciando AddSerieAsync para el usuario {UserId}", _currentUser.Id);
+
             Guid userId = (Guid)_currentUser.Id;
-            // Obtén la lista de seguimiento, asumiendo que solo hay una por ahora
             var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
 
-            // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
             {
                 listaDeSeguimiento = new ListaDeSeguimiento()
@@ -58,27 +65,27 @@ namespace SerializedStalker.ListasDeSeguimiento
                     FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
                 };
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
+                _logger.LogInformation("Nueva lista de seguimiento creada para el usuario {UserId}", userId);
             }
 
-            // Comprueba si la serie ya está en la lista
             if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieDto.ImdbIdentificator))
             {
-                //Agrgar serieDto a un lista para poderla persistir
-                var seriesDto = new List<SerieDto>();
-                seriesDto.Add(serieDto);
+                var seriesDto = new List<SerieDto> { serieDto };
                 await _serieAppService.PersistirSeriesAsync(seriesDto.ToArray());
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
-                listaDeSeguimiento.Series.Add(serie); // Añade la serie a la lista
-                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now); //Actualiza la fecha de modificación
+                listaDeSeguimiento.Series.Add(serie);
+                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now);
+                _logger.LogInformation("Serie {SerieId} agregada a la lista de seguimiento del usuario {UserId}", serie.Id, userId);
             }
             else
             {
-                throw new Exception("La serie ya está en la lista de seguimiento."); // Maneja el caso en que la serie ya está en la lista
+                _logger.LogWarning("La serie {SerieId} ya está en la lista de seguimiento del usuario {UserId}", serieDto.Id, userId);
+                throw new Exception("La serie ya está en la lista de seguimiento.");
             }
 
-            // Actualiza la lista de seguimiento en la base de datos
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
-         }
+            _logger.LogInformation("Lista de seguimiento actualizada para el usuario {UserId}", userId);
+        }
 
         /// <summary>
         /// Muestra todas las series en la lista de seguimiento del usuario actual.
@@ -87,23 +94,20 @@ namespace SerializedStalker.ListasDeSeguimiento
         /// <exception cref="Exception">Se lanza una excepción si no hay series en la lista de seguimiento.</exception>
         public async Task<SerieDto[]> MostrarSeriesAsync()
         {
-            //var userEnt = _currentUser;
+            _logger.LogInformation("Iniciando MostrarSeriesAsync para el usuario {UserId}", _currentUser.Id);
+
             Guid userId = (Guid)_currentUser.Id;
-
-            //Get a IQueryable<T> by including sub collections
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-
-            //Apply additional LINQ extension methods
-                        
             var listaDeSeguimiento = await AsyncExecuter.FirstOrDefaultAsync(queryable);
 
-            // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
             {
+                _logger.LogWarning("No hay series en la lista de seguimiento del usuario {UserId}", userId);
                 throw new Exception("No hay serie que mostrar.");
             }
 
-            return  ObjectMapper.Map< Serie[], SerieDto[]>(listaDeSeguimiento.Series.ToArray());            
+            _logger.LogInformation("Series obtenidas para la lista de seguimiento del usuario {UserId}", userId);
+            return ObjectMapper.Map<Serie[], SerieDto[]>(listaDeSeguimiento.Series.ToArray());
         }
 
         /// <summary>
@@ -114,34 +118,34 @@ namespace SerializedStalker.ListasDeSeguimiento
         /// <exception cref="Exception">Se lanza una excepción si la lista de seguimiento no existe o si la serie no está en la lista de seguimiento.</exception>
         public async Task EliminarSerieAsync(string ImdbID)
         {
-            //var userEnt = _currentUser;
+            _logger.LogInformation("Iniciando EliminarSerieAsync para el usuario {UserId}", _currentUser.Id);
+
             Guid userId = (Guid)_currentUser.Id;
-            //Get a IQueryable<T> by including sub collections
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-
-            //Apply additional LINQ extension methods
-
             var listaDeSeguimiento = await AsyncExecuter.FirstOrDefaultAsync(queryable);
 
-            // Si no existe, crea una nueva lista de seguimiento
             if (listaDeSeguimiento == null)
             {
+                _logger.LogWarning("No existe lista de seguimiento para el usuario {UserId}", userId);
                 throw new Exception("No existe Lista de seguimiento.");
             }
+
             if (listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == ImdbID))
             {
                 var serie = (await _serieRepository.GetListAsync()).LastOrDefault();
-                listaDeSeguimiento.Series.Remove(serie); // Saca la serie a la lista
+                listaDeSeguimiento.Series.Remove(serie);
                 await _serieRepository.DeleteAsync(serie);
-                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now); //Actualiza la fecha de modificación
+                listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now);
+                _logger.LogInformation("Serie {SerieId} eliminada de la lista de seguimiento del usuario {UserId}", serie.Id, userId);
             }
             else
             {
+                _logger.LogWarning("No hay serie que eliminar en la lista de seguimiento del usuario {UserId}", userId);
                 throw new Exception("No hay serie que eliminar.");
             }
-            // Actualiza la lista de seguimiento en la base de datos
-            await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
 
+            await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);
+            _logger.LogInformation("Lista de seguimiento actualizada para el usuario {UserId}", userId);
         }
     }
 }

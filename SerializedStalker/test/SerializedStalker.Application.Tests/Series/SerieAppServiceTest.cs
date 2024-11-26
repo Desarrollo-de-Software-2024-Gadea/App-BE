@@ -43,6 +43,7 @@ public class SerieAppServiceTests
         _seriesApiServiceMock = new Mock<ISeriesApiService>();
         _objectMapper = new Mock<IObjectMapper>();
         _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
+        _loggerMock = new Mock<ILogger<SerieAppService>>();
         _serieAppService = new SerieAppService(
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
