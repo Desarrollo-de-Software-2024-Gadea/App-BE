@@ -1,4 +1,4 @@
-import type { MonitoreoApiDto,  MonitoreoApiEstadisticasDto} from './models';
+import type { MonitoreoApiDto, MonitoreoApiEstadisticasDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
