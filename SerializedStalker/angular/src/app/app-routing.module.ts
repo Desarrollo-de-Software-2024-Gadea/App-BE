@@ -31,6 +31,11 @@ const routes: Routes = [
     loadChildren: () =>
       import('./serie/serie.module').then(m => m.SerieModule),
   },
+  {
+    path: 'monitoreos',
+    loadChildren: () =>
+      import('./monitor-api/monitor-api.module').then(m => m.MonitorApiModule),
+  },
 ];
 
 @NgModule({
