@@ -1,0 +1,104 @@
+/* Estilos para los encabezados */
+h2 {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+  }
+  
+  /* Estilos para la tabla */
+  ngx-datatable {
+    margin: 20px auto;
+    width: 90%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  /* Estilos para los encabezados de la tabla */
+  ngx-datatable ::ng-deep .datatable-header {
+    background-color: #3498db;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  /* Estilos para las filas de la tabla */
+  ngx-datatable ::ng-deep .datatable-body-row:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  ngx-datatable ::ng-deep .datatable-body-row:hover {
+    background-color: #e8f6ff;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Estilos para las celdas de la tabla */
+  ngx-datatable ::ng-deep .datatable-body-cell {
+    font-size: 14px;
+    padding: 10px;
+  }
+  
+  /* Estilos para la sección de estadísticas */
+  .estadisticas {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    margin: 30px auto;
+    width: 80%;
+    gap: 20px;
+  }
+  
+  .tarjeta {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    flex: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.5s ease-in-out;
+    transition: transform 0.2s;
+  }
+  
+  .tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .tarjeta h3 {
+    font-size: 24px;
+    color: #2980b9;
+    margin-top: 10px;
+  }
+  
+  .tarjeta p {
+    font-size: 16px;
+    color: #7f8c8d;
+  }
+  
+  .tarjeta i {
+    font-size: 40px;
+    color: #2980b9;
+    margin-bottom: 10px;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }

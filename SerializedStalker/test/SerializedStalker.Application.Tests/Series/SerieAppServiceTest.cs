@@ -22,6 +22,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Modularity;
 using Volo.Abp.Validation;
 using SerializedStalker;
+using Microsoft.Extensions.Logging;
 
 
 
@@ -33,6 +34,7 @@ public class SerieAppServiceTests
     private readonly Mock<IObjectMapper> _objectMapper;
     private readonly Mock<IMonitoreoApiAppService> _monitoreoApiAppService;
     private readonly SerieAppService _serieAppService;
+    private readonly Mock<ILogger<SerieAppService>> _loggerMock;
 
     public SerieAppServiceTests()
     {
@@ -41,12 +43,14 @@ public class SerieAppServiceTests
         _seriesApiServiceMock = new Mock<ISeriesApiService>();
         _objectMapper = new Mock<IObjectMapper>();
         _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
+        _loggerMock = new Mock<ILogger<SerieAppService>>();
         _serieAppService = new SerieAppService(
             _serieRepositoryMock.Object,
             _seriesApiServiceMock.Object,
             _currentUserServiceMock.Object,
             _objectMapper.Object,
-            _monitoreoApiAppService.Object
+            _monitoreoApiAppService.Object,
+            _loggerMock.Object
         );
     }
 

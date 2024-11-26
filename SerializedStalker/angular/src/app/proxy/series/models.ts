@@ -8,26 +8,6 @@ export interface CalificacionDto {
   usuarioId?: string;
 }
 
-export interface CreateUpdateSerieDto {
-  titulo?: string;
-  clasificacion?: string;
-  fechaEstreno?: string;
-  duracion?: string;
-  generos?: string;
-  directores?: string;
-  escritores?: string;
-  actores?: string;
-  sinopsis?: string;
-  idiomas?: string;
-  pais?: string;
-  poster?: string;
-  imdbPuntuacion?: string;
-  imdbVotos: number;
-  imdbIdentificator?: string;
-  tipo?: string;
-  totalTemporadas: number;
-}
-
 export interface EpisodioDto {
   numeroEpisodio: number;
   fechaEstreno?: string;
@@ -67,4 +47,37 @@ export interface TemporadaDto extends EntityDto<number> {
   numeroTemporada: number;
   serieID: number;
   episodios: EpisodioDto[];
+}
+
+export interface CreateUpdateSerieDto {
+  titulo?: string;
+  clasificacion?: string;
+  fechaEstreno?: string;
+  duracion?: string;
+  generos?: string;
+  directores?: string;
+  escritores?: string;
+  actores?: string;
+  sinopsis?: string;
+  idiomas?: string;
+  pais?: string;
+  poster?: string;
+  imdbPuntuacion?: string;
+  imdbVotos: number;
+  imdbIdentificator?: string;
+  tipo?: string;
+  totalTemporadas: number;
+}
+
+export interface MonitoreoApiDto extends EntityDto<number> {
+  horaEntrada?: string;
+  horaSalida?: string;
+  tiempoDuracion: number;
+  errores: string[];
+}
+
+export interface MonitoreoApiEstadisticasDto extends EntityDto<number> {
+  PromedioDuracion?: number;
+  TotalErrores?: number;
+  TotalMonitoreos?: number;
 }

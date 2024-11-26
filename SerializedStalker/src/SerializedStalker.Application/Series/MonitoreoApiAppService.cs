@@ -11,17 +11,24 @@ using SerializedStalker.Series;
 using System.Diagnostics.CodeAnalysis;
 using Volo.Abp.Application.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace SerializedStalker.Series
 {
-    public class MonitoreoApiAppService: ApplicationService, IMonitoreoApiAppService
+    public class MonitoreoApiAppService : ApplicationService, IMonitoreoApiAppService
     {
         private readonly IRepository<MonitoreoApi, int> _monitoreoApiRepository;
         private readonly IObjectMapper _objectMapper;
-        public MonitoreoApiAppService(IRepository<MonitoreoApi, int> repository, IObjectMapper objectMapper)
+        private readonly ILogger<MonitoreoApiAppService> _logger;
+
+        public MonitoreoApiAppService(
+            IRepository<MonitoreoApi, int> repository,
+            IObjectMapper objectMapper,
+            ILogger<MonitoreoApiAppService> logger)
         {
             _monitoreoApiRepository = repository;
             _objectMapper = objectMapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -31,8 +38,17 @@ namespace SerializedStalker.Series
         /// <returns>Una tarea que representa la operación asincrónica.</returns>
         public async Task PersistirMonitoreoAsync(MonitoreoApiDto monitoreoApiDto)
         {
-            var monitoreo = _objectMapper.Map<MonitoreoApiDto, MonitoreoApi>(monitoreoApiDto);
-            await _monitoreoApiRepository.InsertAsync(monitoreo);
+            try
+            {
+                var monitoreo = _objectMapper.Map<MonitoreoApiDto, MonitoreoApi>(monitoreoApiDto);
+                await _monitoreoApiRepository.InsertAsync(monitoreo);
+                _logger.LogInformation("Monitoreo persistido correctamente: {MonitoreoId}", monitoreo.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al persistir el monitoreo.");
+                throw;
+            }
         }
 
         /// <summary>
@@ -42,16 +58,24 @@ namespace SerializedStalker.Series
         /// <exception cref="Exception">Lanzada cuando no hay monitoreos registrados en el repositorio.</exception>
         public async Task<MonitoreoApiDto[]> MostrarMonitoreosAsync()
         {
-            //Obtenemos los monitoreos del Repositorio (No estoy 100% seguro de que esto funcione)
-            var monitoreos = await _monitoreoApiRepository.GetListAsync();
-
-            // Si no hay monitoreos da una excepción
-            if (monitoreos == null)
+            try
             {
-                throw new Exception("No hay Monitoreos Registrados.");
-            }
+                var monitoreos = await _monitoreoApiRepository.GetListAsync();
 
-            return _objectMapper.Map<MonitoreoApi[], MonitoreoApiDto[]>(monitoreos.ToArray());
+                if (monitoreos == null)
+                {
+                    _logger.LogWarning("No hay monitoreos registrados en el repositorio.");
+                    throw new Exception("No hay Monitoreos Registrados.");
+                }
+
+                _logger.LogInformation("Monitoreos obtenidos correctamente.");
+                return _objectMapper.Map<MonitoreoApi[], MonitoreoApiDto[]>(monitoreos.ToArray());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener los monitoreos.");
+                throw;
+            }
         }
 
         /// <summary>
@@ -61,23 +85,29 @@ namespace SerializedStalker.Series
         /// <exception cref="Exception">Lanzada cuando no hay monitoreos registrados en el repositorio.</exception>
         public async Task<MonitoreoApiEstadisticasDto> ObtenerEstadisticasAsync()
         {
-            // Reutilizamos el método MostrarMonitoreosAsync para obtener los monitoreos
-            var monitoreosDto = await MostrarMonitoreosAsync();
-
-            // Calculamos las estadísticas directamente sobre los DTOs
-            var totalMonitoreos = monitoreosDto.Length;
-            var promedioDuracion = monitoreosDto.Average(m => m.TiempoDuracion);
-            var totalErrores = monitoreosDto.Sum(m => m.Errores.Count);
-
-            // Creamos el DTO con las estadísticas
-            var estadisticasDto = new MonitoreoApiEstadisticasDto
+            try
             {
-                PromedioDuracion = promedioDuracion,
-                TotalErrores = totalErrores,
-                TotalMonitoreos = totalMonitoreos
-            };
+                var monitoreosDto = await MostrarMonitoreosAsync();
 
-            return estadisticasDto;
+                var totalMonitoreos = monitoreosDto.Length;
+                var promedioDuracion = monitoreosDto.Average(m => m.TiempoDuracion);
+                var totalErrores = monitoreosDto.Sum(m => m.Errores.Count);
+
+                var estadisticasDto = new MonitoreoApiEstadisticasDto
+                {
+                    PromedioDuracion = promedioDuracion,
+                    TotalErrores = totalErrores,
+                    TotalMonitoreos = totalMonitoreos
+                };
+
+                _logger.LogInformation("Estadísticas obtenidas correctamente.");
+                return estadisticasDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las estadísticas.");
+                throw;
+            }
         }
     }
 }

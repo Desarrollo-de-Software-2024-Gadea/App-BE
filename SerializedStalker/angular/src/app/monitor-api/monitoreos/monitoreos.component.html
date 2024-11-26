@@ -1,0 +1,37 @@
+<h2>Monitoreos de la API</h2>
+
+<div class="monitoreos">
+  <ngx-datatable
+    *ngIf="monitoreos.length"
+    class="bootstrap"
+    [rows]="monitoreos"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+  >
+    <ngx-datatable-column name="Hora de Inicio" prop="horaEntrada"></ngx-datatable-column>
+    <ngx-datatable-column name="Hora de Salida" prop="horaSalida"></ngx-datatable-column>
+    <ngx-datatable-column name="Duración" prop="tiempoDuracion"></ngx-datatable-column>
+    <ngx-datatable-column name="Errores" prop="errores"></ngx-datatable-column>
+  </ngx-datatable>
+</div>
+
+<h2>Estadísticas</h2>
+<div class="estadisticas" *ngIf="estadisticas">
+  <div class="tarjeta">
+    <i class="fas fa-clock"></i>
+    <p>Promedio de Duración</p>
+    <h3>{{ estadisticas.promedioDuracion }}</h3>
+  </div>
+  <div class="tarjeta">
+    <i class="fas fa-bug"></i>
+    <p>Total de Errores</p>
+    <h3>{{ estadisticas.totalErrores }}</h3>
+  </div>
+  <div class="tarjeta">
+    <i class="fas fa-chart-line"></i>
+    <p>Total de Monitoreos</p>
+    <h3>{{ estadisticas.totalMonitoreos }}</h3>
+  </div>
+</div>
