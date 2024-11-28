@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using SerializedStalker.Usuarios;
 using Volo.Abp;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.Sqlite;
@@ -23,7 +24,7 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
     private SqliteConnection? _sqliteConnection;
 
     public override void ConfigureServices(ServiceConfigurationContext context)
-    {
+    {        
         Configure<FeatureManagementOptions>(options =>
         {
             options.SaveStaticFeaturesToDatabase = false;
@@ -35,6 +36,15 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
             options.IsDynamicPermissionStoreEnabled = false;
         });
         context.Services.AddAlwaysDisableUnitOfWorkTransaction();
+        //Agregado para solucioner problemas con las pruebas 
+        //Quizas convenga agregarle autorización a las pruebas en si
+        Configure<AbpUnitOfWorkOptions>(options =>
+        {
+            options.IsTransactional = false; // Deshabilitar transacciones para pruebas
+        });
+
+        // Mockear servicios si es necesario
+        context.Services.AddAlwaysAllowAuthorization();
 
         ConfigureInMemorySqlite(context.Services);
 
@@ -67,7 +77,7 @@ public class SerializedStalkerEntityFrameworkCoreTestModule : AbpModule
             .UseSqlite(connection)
             .Options;
 
-        using (var context = new SerializedStalkerDbContext(options))
+        using (var context = new SerializedStalkerDbContext(options, new FakeCurrentUserService()))
         {
             context.GetService<IRelationalDatabaseCreator>().CreateTables();
         }

@@ -115,6 +115,37 @@ namespace SerializedStalker.Migrations
                     b.ToTable("AppListasDeSeguimiento", (string)null);
                 });
 
+            modelBuilder.Entity("SerializedStalker.Series.Calificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SerieID")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("calificacion")
+                        .HasColumnType("real");
+
+                    b.Property<string>("comentario")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SerieID");
+
+                    b.ToTable("AppCalificacion", (string)null);
+                });
+
             modelBuilder.Entity("SerializedStalker.Series.Episodio", b =>
                 {
                     b.Property<int>("Id")
@@ -188,6 +219,13 @@ namespace SerializedStalker.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)")
                         .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<Guid>("Creator")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
 
                     b.Property<string>("Directores")
                         .IsRequired()
@@ -2178,6 +2216,17 @@ namespace SerializedStalker.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
+            modelBuilder.Entity("SerializedStalker.Series.Calificacion", b =>
+                {
+                    b.HasOne("SerializedStalker.Series.Serie", "Serie")
+                        .WithMany("Calificaciones")
+                        .HasForeignKey("SerieID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Serie");
+                });
+
             modelBuilder.Entity("SerializedStalker.Series.Episodio", b =>
                 {
                     b.HasOne("SerializedStalker.Series.Temporada", "Temporada")
@@ -2365,6 +2414,8 @@ namespace SerializedStalker.Migrations
 
             modelBuilder.Entity("SerializedStalker.Series.Serie", b =>
                 {
+                    b.Navigation("Calificaciones");
+
                     b.Navigation("Temporadas");
                 });
 

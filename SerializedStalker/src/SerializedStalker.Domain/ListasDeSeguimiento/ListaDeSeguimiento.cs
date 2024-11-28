@@ -11,7 +11,7 @@ namespace SerializedStalker.ListasDeSeguimiento
 {
     public class ListaDeSeguimiento : AggregateRoot<int>
     {
-        public List<Serie> Series { get; set; }
-        public DateOnly FechaModificacion {  get; set; } 
+        public List<Serie> Series { get; set; } = new List<Serie>(); // Inicializar aquí
+        public DateOnly FechaModificacion { get; set; }
     }
 }

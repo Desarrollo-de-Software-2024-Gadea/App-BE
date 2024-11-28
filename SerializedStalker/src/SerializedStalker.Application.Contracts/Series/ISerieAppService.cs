@@ -12,7 +12,7 @@ namespace SerializedStalker.Series
     {
         Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null); // Hacer que el genero sea opcional
         Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada);
+        Task CalificarSerieAsync(CalificacionDto input);
     }
 }
-
 
