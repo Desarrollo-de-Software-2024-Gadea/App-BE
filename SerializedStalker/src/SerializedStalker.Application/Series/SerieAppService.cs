@@ -9,22 +9,28 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Users;
+using Volo.Abp.ObjectMapping;
+
 
 namespace SerializedStalker.Series
 {
-    [Authorize]
+    //[Authorize]
     public class SerieAppService : CrudAppService<Serie, SerieDto, int, PagedAndSortedResultRequestDto, CreateUpdateSerieDto, CreateUpdateSerieDto>, ISerieAppService
     {
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IObjectMapper _objectMapper;
 
-        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService)
+
+        public SerieAppService(IRepository<Serie, int> repository, ISeriesApiService seriesApiService, ICurrentUserService currentUserService, IObjectMapper objectMapper)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _currentUserService = currentUserService;
+            _objectMapper = objectMapper;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
@@ -82,6 +88,62 @@ namespace SerializedStalker.Series
 
             // Actualizar la serie en el repositorio
             await _serieRepository.UpdateAsync(serie);
+        }
+        // Nuevo método para persistir las series en la base de datos
+        public async Task PersistirSeriesAsync(SerieDto[] seriesDto)
+        {
+            var seriesExistentes = await _serieRepository.GetListAsync(); // Obtener todas las series //No esta devolviendo GetListAsync nada
+
+            if (seriesExistentes == null)
+            {
+                seriesExistentes = new List<Serie>();
+            }
+
+            foreach (var serieDto in seriesDto)
+            {
+                // Comprobación para evitar excepciones al acceder a propiedades de un objeto que podría ser null
+                if (serieDto == null) continue; // Salta si serieDto es null
+                var userIdActual = _currentUserService.GetCurrentUserId();
+                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual);
+
+                if (serieExistente == null)
+                {
+                    // Crear nueva serie                 
+                    // Utilizar mappers nuevaSerie
+                    var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
+
+                    // Asegúrate de que Temporadas no sea null
+                    if (serieDto.Temporadas != null)
+                    {
+                        foreach (var temporadaDto in serieDto.Temporadas)
+                        {
+                            var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                            /*var nuevaTemporada = new Temporada
+                            {
+                                NumeroTemporada = temporadaDto.NumeroTemporada,
+                                Titulo = temporadaDto.Titulo,
+                                FechaLanzamiento = temporadaDto.FechaLanzamiento,
+                                Episodios = temporadaDto.Episodios.Select(e => new Episodio
+                                {
+                                    NumeroEpisodio = e.NumeroEpisodio,
+                                    Titulo = e.Titulo,
+                                    FechaEstreno = e.FechaEstreno
+                                }).ToList()
+                            };*/
+                            nuevaSerie.Temporadas.Add(nuevaTemporada);
+                        }
+                    }
+
+                    // Persistir la nueva serie en la base de datos
+                    await _serieRepository.InsertAsync(nuevaSerie);
+                }
+                else
+                {
+                    // Actualizar la serie existente con nueva información
+                    serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+                    await _serieRepository.UpdateAsync(serieExistente);
+                }
+            }
         }
     }
 }
