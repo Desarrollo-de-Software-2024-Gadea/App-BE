@@ -280,26 +280,32 @@ namespace SerializedStalker.Series
                     }
                     else
                     {
-                        serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
-
-                        if (serieDto.Temporadas != null)
+                        if (serieExistente.TotalTemporadas == serieDto.TotalTemporadas)
                         {
-                            foreach (var temporadaDto in serieDto.Temporadas)
+                            throw new InvalidOperationException("Serie ya esta persistida");
+                        }
+                        else
+                        {
+                            serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+                            if (serieDto.Temporadas != null)
                             {
-                                var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
-                                if (temporadaExistente == null)
+                                foreach (var temporadaDto in serieDto.Temporadas)
                                 {
-                                    var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
-                                    serieExistente.Temporadas.Add(nuevaTemporada);
-                                }
-                                else
-                                {
-                                    _objectMapper.Map(temporadaDto, temporadaExistente);
+                                    var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
+                                    if (temporadaExistente == null)
+                                    {
+                                        var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                                        serieExistente.Temporadas.Add(nuevaTemporada);
+                                    }
+                                    else
+                                    {
+                                        _objectMapper.Map(temporadaDto, temporadaExistente);
+                                    }
                                 }
                             }
-                        }
 
-                        await _serieRepository.UpdateAsync(serieExistente);
+                            await _serieRepository.UpdateAsync(serieExistente);
+                        }
                     }
                 }
                 _logger.LogInformation("Series persistidas correctamente.");
