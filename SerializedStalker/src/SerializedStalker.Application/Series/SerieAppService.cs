@@ -244,27 +244,28 @@ namespace SerializedStalker.Series
                     seriesExistentes = new List<Serie>();
                 }
 
-                foreach (var serieDto in seriesDto)
+                 foreach (var serieDto in seriesDto)
                 {
                     if (serieDto == null) continue;
 
-                    var userIdActual = _currentUserService.GetCurrentUserId();
+                    /*var userIdActual = _currentUserService.GetCurrentUserId();
                     if (!userIdActual.HasValue)
                     {
                         throw new InvalidOperationException("User ID cannot be null");
-                    }
+                    }*/
 
                     if (serieDto.ImdbIdentificator == null)
                     {
                         throw new InvalidOperationException("ImdbIdentificator cannot be null");
                     }
 
-                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual.Value);
+                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator/* && s.CreatorId == userIdActual.Value*/);
 
                     if (serieExistente == null)
                     {
                         var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
-                        nuevaSerie.CreatorId = userIdActual.Value;
+                        nuevaSerie.Temporadas = new List<Temporada>();
+                        //nuevaSerie.CreatorId = userIdActual.Value;
 
                         if (serieDto.Temporadas != null)
                         {

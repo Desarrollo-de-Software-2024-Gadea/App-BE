@@ -16,7 +16,7 @@ using static Volo.Abp.Identity.IdentityPermissions;
 
 namespace SerializedStalker.ListasDeSeguimiento
 {
-    [Authorize]
+    //[Authorize]
     public class ListaDeSeguimientoAppService : ApplicationService, IListaDeSeguimientoAppService
     {
         private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
