@@ -343,85 +343,24 @@ public class SerieAppServiceTests
         _serieRepositoryMock.Verify(r => r.InsertAsync(It.Is<Serie>(s => s.ImdbIdentificator == "tt1234567" && s.TotalTemporadas == 3 && s.CreatorId == userId), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// Verifica que se lance una InvalidOperationException cuando se intenta persistir una serie que ya está persistida.
+    /// </summary>
     [Fact]
-    public async Task PersistirSeriesAsync_ShouldThrowException_WhenSerieIsAlreadyPersisted()
+    public async Task PersistirSeriesAsync_ShouldThrowInvalidOperationException_WhenSerieAlreadyPersisted()
     {
         // Arrange
-        var serieDto = new SerieDto
-        {
-            ImdbIdentificator = "tt1234567",
-            TotalTemporadas = 3
-        };
-        var serieId = 1;
-        var serie = new Serie
-        {
-            ImdbIdentificator = "tt1234567",
-            TotalTemporadas = 3
-        };
-        _serieRepositoryMock.Setup(r => r.GetAsync(serieId, true, It.IsAny<CancellationToken>())).ReturnsAsync(serie);
-        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync((List<Serie>)null);
-        _objectMapper.Setup(m => m.Map<SerieDto, Serie>(It.IsAny<SerieDto>())).Returns((SerieDto dto) => new Serie
-        {
-            Titulo = dto.Titulo,
-            Clasificacion = dto.Clasificacion,
-            FechaEstreno = dto.FechaEstreno,
-            Duracion = dto.Duracion,
-            Generos = dto.Generos,
-            Directores = dto.Directores,
-            Escritores = dto.Escritores,
-            Actores = dto.Actores,
-            Sinopsis = dto.Sinopsis,
-            Idiomas = dto.Idiomas,
-            Pais = dto.Pais,
-            Poster = dto.Poster,
-            ImdbPuntuacion = dto.ImdbPuntuacion,
-            ImdbVotos = dto.ImdbVotos,
-            ImdbIdentificator = dto.ImdbIdentificator,
-            Tipo = dto.Tipo,
-            TotalTemporadas = dto.TotalTemporadas,
-        });
+        var serieDto = new SerieDto { ImdbIdentificator = "tt1234567", TotalTemporadas = 3 };
+        var seriesDto = new[] { serieDto };
+
+        var serieExistente = new Serie { ImdbIdentificator = "tt1234567", TotalTemporadas = 3 };
+        _serieRepositoryMock.Setup(repo => repo.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Serie> { serieExistente });
+
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(seriesDto));
+        Assert.Equal("Serie ya esta persistida", exception.Message);
     }
-
-    /// <summary>
-    /// Verifica que el método <c>PersistirSeriesAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
-    /// cuando el método <c>GetListAsync</c> del repositorio retorna null.
-    /// </summary>
-    /* [Fact]
-     public async Task PersistirSeriesAsync_ShouldThrowException_WhenGetListAsyncReturnsNull()
-     {
-         // Arrange
-         var serieDto = new SerieDto
-         {
-             ImdbIdentificator = "tt1234567",
-             TotalTemporadas = 3
-         };
-
-         _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync((List<Serie>)null);
-         _objectMapper.Setup(m => m.Map<SerieDto, Serie>(It.IsAny<SerieDto>())).Returns((SerieDto dto) => new Serie
-         {
-             Titulo = dto.Titulo,
-             Clasificacion = dto.Clasificacion,
-             FechaEstreno = dto.FechaEstreno,
-             Duracion = dto.Duracion,
-             Generos = dto.Generos,
-             Directores = dto.Directores,
-             Escritores = dto.Escritores,
-             Actores = dto.Actores,
-             Sinopsis = dto.Sinopsis,
-             Idiomas = dto.Idiomas,
-             Pais = dto.Pais,
-             Poster = dto.Poster,
-             ImdbPuntuacion = dto.ImdbPuntuacion,
-             ImdbVotos = dto.ImdbVotos,
-             ImdbIdentificator = dto.ImdbIdentificator,
-             Tipo = dto.Tipo,
-             TotalTemporadas = dto.TotalTemporadas,
-         });
-         // Act & Assert
-         await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
-     }*/
 
     //Tests para modificar calificación
 
