@@ -243,6 +243,7 @@ namespace SerializedStalker.Series
                         Pais = json["Country"]?.ToString(),
                         Poster = json["Poster"]?.ToString(),
                         ImdbPuntuacion = json["imdbRating"]?.ToString(),
+                        ImdbIdentificator = imdbId,
                         ImdbVotos = int.TryParse(json["imdbVotes"]?.ToString().Replace(",", ""), out var votes) ? votes : 0,
                         Tipo = json["Type"]?.ToString(),
                         TotalTemporadas = int.TryParse(json["totalSeasons"]?.ToString(), out var seasons) ? seasons : 0

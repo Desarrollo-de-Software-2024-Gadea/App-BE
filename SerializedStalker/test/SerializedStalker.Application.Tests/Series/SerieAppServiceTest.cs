@@ -281,11 +281,28 @@ public class SerieAppServiceTests
         var userId = Guid.NewGuid();
         var serieDto = new SerieDto
         {
+            Titulo = "Test 2",
+            Clasificacion = "PG-13",
+            FechaEstreno = "2023-01-09",
+            Duracion = "2h",
+            Generos = "Drama",
+            Directores = "Director Test",
+            Escritores = "Writer Test",
+            Actores = "Actor Test",
+            Sinopsis = "Test Sinopsis",
+            Idiomas = "Español",
+            Pais = "España",
+            Poster = "URL del poster",
+            ImdbPuntuacion = "8.7",
+            ImdbVotos = 1000,
             ImdbIdentificator = "tt1234567",
+            Tipo = "Serie",
             TotalTemporadas = 3,
             Temporadas = new List<TemporadaDto>
         {
-            new TemporadaDto { NumeroTemporada = 1, Titulo = "Temporada 1" }
+            new TemporadaDto { NumeroTemporada = 1, Titulo = "Temporada 1" },
+            new TemporadaDto { NumeroTemporada = 2, Titulo = "Temporada 2" },
+            new TemporadaDto { NumeroTemporada = 3, Titulo = "Temporada 3" },
         }
         };
 
@@ -293,16 +310,32 @@ public class SerieAppServiceTests
         _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<Serie>());
         _objectMapper.Setup(m => m.Map<SerieDto, Serie>(It.IsAny<SerieDto>())).Returns((SerieDto dto) => new Serie
         {
+            Titulo = dto.Titulo,
+            Clasificacion = dto.Clasificacion,
+            FechaEstreno = dto.FechaEstreno,
+            Duracion = dto.Duracion,
+            Generos = dto.Generos,
+            Directores = dto.Directores,
+            Escritores = dto.Escritores,
+            Actores = dto.Actores,
+            Sinopsis = dto.Sinopsis,
+            Idiomas = dto.Idiomas,
+            Pais = dto.Pais,
+            Poster = dto.Poster,
+            ImdbPuntuacion = dto.ImdbPuntuacion,
+            ImdbVotos = dto.ImdbVotos,
             ImdbIdentificator = dto.ImdbIdentificator,
+            Tipo = dto.Tipo,
             TotalTemporadas = dto.TotalTemporadas,
             CreatorId = userId,
-            Temporadas = dto.Temporadas.Select(t => new Temporada
-            {
-                NumeroTemporada = t.NumeroTemporada,
-                Titulo = t.Titulo
-            }).ToList()
         });
-
+        _objectMapper.Setup(m => m.Map<TemporadaDto, Temporada>(It.IsAny<TemporadaDto>())).Returns((TemporadaDto dto) => new Temporada
+        {
+            Titulo = dto.Titulo,
+            FechaLanzamiento = dto.FechaLanzamiento,
+            NumeroTemporada = dto.NumeroTemporada,
+            SerieID = dto.SerieID
+        });
         // Act
         await _serieAppService.PersistirSeriesAsync(new[] { serieDto });
 
@@ -311,23 +344,22 @@ public class SerieAppServiceTests
     }
 
     /// <summary>
-    /// Verifica que el método <c>PersistirSeriesAsync</c> lance una excepción <see cref="InvalidOperationException"/> 
-    /// cuando el método <c>GetListAsync</c> del repositorio retorna null.
+    /// Verifica que se lance una InvalidOperationException cuando se intenta persistir una serie que ya está persistida.
     /// </summary>
     [Fact]
-    public async Task PersistirSeriesAsync_ShouldThrowException_WhenGetListAsyncReturnsNull()
+    public async Task PersistirSeriesAsync_ShouldThrowInvalidOperationException_WhenSerieAlreadyPersisted()
     {
         // Arrange
-        var serieDto = new SerieDto
-        {
-            ImdbIdentificator = "tt1234567",
-            TotalTemporadas = 3
-        };
+        var serieDto = new SerieDto { ImdbIdentificator = "tt1234567", TotalTemporadas = 3 };
+        var seriesDto = new[] { serieDto };
 
-        _serieRepositoryMock.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Serie, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync((List<Serie>)null);
+        var serieExistente = new Serie { ImdbIdentificator = "tt1234567", TotalTemporadas = 3 };
+        _serieRepositoryMock.Setup(repo => repo.GetListAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Serie> { serieExistente });
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(new[] { serieDto }));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _serieAppService.PersistirSeriesAsync(seriesDto));
+        Assert.Equal("Serie ya esta persistida", exception.Message);
     }
 
     //Tests para modificar calificación

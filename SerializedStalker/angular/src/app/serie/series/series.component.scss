@@ -1,5 +1,3 @@
-// series.component.scss
-
 // General styles for the component
 :host {
     display: block;
@@ -21,6 +19,7 @@ form {
         border: 1px solid #ced4da; // Light border
         border-radius: 4px; // Rounded input
         font-size: 16px;
+        transition: border-color 0.3s ease;
 
         &:focus {
             border-color: #80bdff; // Change border color on focus
@@ -36,45 +35,96 @@ form {
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
 
         &:hover {
             background-color: #0056b3; // Darker shade on hover
+            transform: scale(1.05); // Slightly enlarge on hover
+        }
+
+        &:active {
+            transform: scale(0.95); // Slightly shrink on click
         }
     }
 }
 
-// Styles for the data table
-ngx-datatable {
-    margin-top: 20px;
+// Styles for the series container
+.series-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
 
-    // Header styles
-    .ngx-datatable-header {
-        background-color: #007bff; // Header background color
-        color: white; // Header text color
-    }
+// Styles for each serie card
+.serie-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    transition: transform 0.3s ease;
 
-    // Row styles
-    .ngx-datatable-row {
-        &:nth-child(odd) {
-            background-color: #f2f2f2; // Zebra striping for rows
-        }
-
-        &:hover {
-            background-color: #e9ecef; // Highlight row on hover
-        }
-    }
-
-    // Column styles
-    ngx-datatable-column {
-        text-align: left; // Align text to the left
+    &:hover {
+        transform: scale(1.05); // Slightly enlarge on hover
     }
 }
 
-// Styles for the poster image
-img {
+// Styles for the serie poster
+.serie-poster {
     border-radius: 4px; // Rounded corners for images
-    width: 200px; // Set width for posters
+    width: 100%; // Full width
     height: auto; // Maintain aspect ratio
     max-height: 300px; // Set maximum height for posters
     object-fit: cover; // Ensure the image covers the area without distortion
+    margin-bottom: 15px;
+}
+
+// Styles for the serie details
+.serie-details {
+    text-align: center;
+
+    h3 {
+        margin: 10px 0;
+        font-size: 1.2em;
+    }
+
+    p {
+        margin: 5px 0;
+        font-size: 0.9em;
+    }
+
+    button {
+        padding: 5px 10px;
+        background-color: #28a745; // Success button color
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+            background-color: #218838; // Darker shade on hover
+            transform: scale(1.05); // Slightly enlarge on hover
+        }
+
+        &:active {
+            transform: scale(0.95); // Slightly shrink on click
+        }
+    }
+
+    .spinner-border {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-width: 0.2em;
+        margin-top: 10px;
+    }
+
+    .fa-check {
+        color: #28a745; // Success color
+        font-size: 1.5rem;
+        margin-top: 10px;
+    }
 }

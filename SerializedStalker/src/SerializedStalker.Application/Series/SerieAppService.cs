@@ -244,27 +244,28 @@ namespace SerializedStalker.Series
                     seriesExistentes = new List<Serie>();
                 }
 
-                foreach (var serieDto in seriesDto)
+                 foreach (var serieDto in seriesDto)
                 {
                     if (serieDto == null) continue;
 
-                    var userIdActual = _currentUserService.GetCurrentUserId();
+                    /*var userIdActual = _currentUserService.GetCurrentUserId();
                     if (!userIdActual.HasValue)
                     {
                         throw new InvalidOperationException("User ID cannot be null");
-                    }
+                    }*/
 
                     if (serieDto.ImdbIdentificator == null)
                     {
                         throw new InvalidOperationException("ImdbIdentificator cannot be null");
                     }
 
-                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator && s.CreatorId == userIdActual.Value);
+                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator/* && s.CreatorId == userIdActual.Value*/);
 
                     if (serieExistente == null)
                     {
                         var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
-                        nuevaSerie.CreatorId = userIdActual.Value;
+                        nuevaSerie.Temporadas = new List<Temporada>();
+                        //nuevaSerie.CreatorId = userIdActual.Value;
 
                         if (serieDto.Temporadas != null)
                         {
@@ -279,26 +280,32 @@ namespace SerializedStalker.Series
                     }
                     else
                     {
-                        serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
-
-                        if (serieDto.Temporadas != null)
+                        if (serieExistente.TotalTemporadas == serieDto.TotalTemporadas)
                         {
-                            foreach (var temporadaDto in serieDto.Temporadas)
+                            throw new InvalidOperationException("Serie ya esta persistida");
+                        }
+                        else
+                        {
+                            serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+                            if (serieDto.Temporadas != null)
                             {
-                                var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
-                                if (temporadaExistente == null)
+                                foreach (var temporadaDto in serieDto.Temporadas)
                                 {
-                                    var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
-                                    serieExistente.Temporadas.Add(nuevaTemporada);
-                                }
-                                else
-                                {
-                                    _objectMapper.Map(temporadaDto, temporadaExistente);
+                                    var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
+                                    if (temporadaExistente == null)
+                                    {
+                                        var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                                        serieExistente.Temporadas.Add(nuevaTemporada);
+                                    }
+                                    else
+                                    {
+                                        _objectMapper.Map(temporadaDto, temporadaExistente);
+                                    }
                                 }
                             }
-                        }
 
-                        await _serieRepository.UpdateAsync(serieExistente);
+                            await _serieRepository.UpdateAsync(serieExistente);
+                        }
                     }
                 }
                 _logger.LogInformation("Series persistidas correctamente.");
