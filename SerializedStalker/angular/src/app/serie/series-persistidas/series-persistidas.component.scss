@@ -1,0 +1,47 @@
+// Styles for the series container
+.series-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+  
+  // Styles for each serie card
+  .serie-card {
+    background-color: rgba(243, 243, 242, 0.932);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row; /* Cambiar a fila */
+    align-items: flex-start;
+    padding: 15px;
+    transition: transform 0.3s ease;
+  
+    &:hover {
+      transform: scale(1.05); // Slightly enlarge on hover
+    }
+  }
+  
+  // Styles for the serie poster
+  .serie-poster {
+    border-radius: 4px;
+    width: 200px; /* Ajusta el ancho según sea necesario */
+    height: auto;
+    object-fit: cover;
+    margin-right: 15px; /* Espacio entre el póster y los detalles */
+  }
+  
+  // Styles for the serie details
+  .serie-details {
+    text-align: left; /* Alinear texto a la izquierda */
+  
+    h3 {
+      margin: 10px 0;
+      font-size: 1.2em;
+    }
+  
+    p {
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+  }

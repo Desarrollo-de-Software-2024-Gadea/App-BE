@@ -1,0 +1,10 @@
+﻿{
+  "applications": {
+    "SerializedStalker.HttpApi.Host": {
+      "type": "dotnet-project",
+      "launchUrl": "https://localhost:44302",
+      "path": "../../../src/SerializedStalker.HttpApi.Host/SerializedStalker.HttpApi.Host.csproj",
+      "kubernetesService": ".*-httpapihost$"  
+    }
+  }
+}
