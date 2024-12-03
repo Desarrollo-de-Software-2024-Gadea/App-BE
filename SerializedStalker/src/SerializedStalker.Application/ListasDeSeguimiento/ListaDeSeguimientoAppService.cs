@@ -53,11 +53,12 @@ namespace SerializedStalker.ListasDeSeguimiento
         /// <exception cref="Exception">Se lanza una excepción si la serie ya está en la lista de seguimiento.</exception>
         public async Task AddSerieAsync(SerieDto serieDto)
         {
-            _logger.LogInformation("Iniciando AddSerieAsync para el usuario {UserId}", _currentUser.Id);
+            _logger.LogInformation("Iniciando AddSerieAsync para el usuario {UserId}", 0);//_currentUser.Id);
 
             Guid userId = (Guid)_currentUser.Id;
-            var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
-
+            //var listaDeSeguimiento = (await _listaDeSeguimientoRepository.GetListAsync()).FirstOrDefault(l => l.CreatorId == userId);
+            var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
+            var listaDeSeguimiento = await AsyncExecuter.FirstOrDefaultAsync(queryable);
             if (listaDeSeguimiento == null)
             {
                 listaDeSeguimiento = new ListaDeSeguimiento()
