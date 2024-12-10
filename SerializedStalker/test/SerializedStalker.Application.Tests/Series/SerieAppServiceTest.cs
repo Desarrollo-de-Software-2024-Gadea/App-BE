@@ -161,8 +161,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = serieId,
-            calificacion = 5,
-            comentario = "Great series! Needs more Phillip, thou"
+            NroCalificacion = 5,
+            Comentario = "Great series! Needs more Phillip, thou"
         };
 
         // Act & Assert
@@ -192,8 +192,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = serieId,
-            calificacion = 5,
-            comentario = "Great series! Needs more Phillip, thou"
+            NroCalificacion = 5,
+            Comentario = "Great series! Needs more Phillip, thou"
         };
 
         // Act
@@ -225,8 +225,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = serieId,
-            calificacion = 5,
-            comentario = "Last thing you will ever watch."
+            NroCalificacion = 5,
+            Comentario = "Last thing you will ever watch."
         };
 
         // Act
@@ -251,7 +251,7 @@ public class SerieAppServiceTests
             CreatorId = userId,
             Calificaciones = new List<Calificacion>
         {
-            new Calificacion { UsuarioId = userId, calificacion = 5, comentario = "Great series!" }
+            new Calificacion { UsuarioId = userId, NroCalificacion = 5, Comentario = "Great series!" }
         }
         };
 
@@ -261,8 +261,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = serieId,
-            calificacion = 5,
-            comentario = "Lorem ipsum!"
+            NroCalificacion = 5,
+            Comentario = "Lorem ipsum!"
         };
 
         // Act & Assert
@@ -375,8 +375,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = 1,
-            calificacion = 5,
-            comentario = "Great series!"
+            NroCalificacion = 5,
+            Comentario = "Great series!"
         };
 
         _serieRepositoryMock.Setup(r => r.GetAsync(calificacionDto.SerieID, true, It.IsAny<CancellationToken>())).ReturnsAsync((Serie)null);
@@ -396,8 +396,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = 1,
-            calificacion = 5,
-            comentario = "Great series!"
+            NroCalificacion = 5,
+            Comentario = "Great series!"
         };
 
         var serie = new Serie
@@ -425,8 +425,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = 1,
-            calificacion = 5,
-            comentario = "Great series!"
+            NroCalificacion = 5,
+            Comentario = "Great series!"
         };
 
         var serie = new Serie
@@ -454,8 +454,8 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = 1,
-            calificacion = 5,
-            comentario = "Great series!"
+            NroCalificacion = 5,
+            Comentario = "Great series!"
         };
 
         var serie = new Serie
@@ -483,15 +483,15 @@ public class SerieAppServiceTests
         var calificacionDto = new CalificacionDto
         {
             SerieID = 1,
-            calificacion = 5,
-            comentario = "Great series!"
+            NroCalificacion = 5,
+            Comentario = "Great series!"
         };
 
         var calificacionExistente = new Calificacion
         {
             UsuarioId = userId,
-            calificacion = 3,
-            comentario = "Good series"
+            NroCalificacion = 3,
+            Comentario = "Good series"
         };
 
         var serie = new Serie
@@ -507,8 +507,8 @@ public class SerieAppServiceTests
         await _serieAppService.ModificarCalificacionAsync(calificacionDto);
 
         // Assert
-        Assert.Equal(calificacionDto.calificacion, calificacionExistente.calificacion);
-        Assert.Equal(calificacionDto.comentario, calificacionExistente.comentario);
+        Assert.Equal(calificacionDto.NroCalificacion, calificacionExistente.NroCalificacion);
+        Assert.Equal(calificacionDto.Comentario, calificacionExistente.Comentario);
         _serieRepositoryMock.Verify(r => r.UpdateAsync(serie, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
