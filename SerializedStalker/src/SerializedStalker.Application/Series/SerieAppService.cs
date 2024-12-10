@@ -152,8 +152,8 @@ namespace SerializedStalker.Series
 
                 var calificacion = new Calificacion
                 {
-                    calificacion = input.calificacion,
-                    comentario = input.comentario,
+                    NroCalificacion = input.NroCalificacion,
+                    Comentario = input.Comentario,
                     FechaCreacion = DateTime.Now,
                     SerieID = input.SerieID,
                     UsuarioId = userIdActual.Value
@@ -211,8 +211,8 @@ namespace SerializedStalker.Series
                     throw new InvalidOperationException("No hay calificación que modificar.");
                 }
 
-                calificacionExistente.calificacion = input.calificacion;
-                calificacionExistente.comentario = input.comentario;
+                calificacionExistente.NroCalificacion = input.NroCalificacion;
+                calificacionExistente.Comentario = input.Comentario;
                 calificacionExistente.FechaCreacion = DateTime.Now;
 
                 await _serieRepository.UpdateAsync(serie);

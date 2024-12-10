@@ -231,8 +231,8 @@ public class SerializedStalkerDbContext :
             b.ToTable(SerializedStalkerConsts.DbTablePrefix + "Calificacion",
                 SerializedStalkerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.calificacion).IsRequired();
-            b.Property(x => x.comentario);
+            b.Property(x => x.NroCalificacion).IsRequired();
+            b.Property(x => x.Comentario);
             b.Property(x => x.FechaCreacion).IsRequired();
             b.Property(x => x.SerieID).IsRequired();
             b.Property(x => x.UsuarioId).IsRequired(); // Configura la propiedad UsuarioId como requerida
