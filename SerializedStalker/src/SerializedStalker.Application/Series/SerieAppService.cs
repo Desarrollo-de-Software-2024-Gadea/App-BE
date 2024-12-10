@@ -54,16 +54,12 @@ namespace SerializedStalker.Series
         /// <exception cref="Exception">Lanzada si ocurre un error durante la búsqueda de series.</exception>
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
-            var monitoreo = new MonitoreoApiDto
-            {
-                HoraEntrada = DateTime.Now
-            };
+            var monitoreo = await _monitoreoApiAppService.IniciarMonitoreo();
 
             try
             {
                 var series = await _seriesApiService.BuscarSerieAsync(titulo, genero);
-                monitoreo.HoraSalida = DateTime.Now;
-                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+                monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
                 await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 _logger.LogInformation("Búsqueda de series completada correctamente.");
                 return series;
@@ -71,8 +67,7 @@ namespace SerializedStalker.Series
             catch (Exception ex)
             {
                 monitoreo.HoraSalida = DateTime.Now;
-                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
-                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex);
                 await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 _logger.LogError(ex, "Error al buscar series.");
                 throw;
@@ -88,25 +83,19 @@ namespace SerializedStalker.Series
         /// <exception cref="Exception">Lanzada si ocurre un error durante la búsqueda de la temporada.</exception>
         public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int numeroTemporada)
         {
-            var monitoreo = new MonitoreoApiDto
-            {
-                HoraEntrada = DateTime.Now
-            };
+            var monitoreo = await _monitoreoApiAppService.IniciarMonitoreo();
+
 
             try
             {
                 var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, numeroTemporada);
-                monitoreo.HoraSalida = DateTime.Now;
-                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
-                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
                 _logger.LogInformation("Búsqueda de temporada completada correctamente.");
                 return temporada;
             }
             catch (Exception ex)
             {
-                monitoreo.HoraSalida = DateTime.Now;
-                monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
-                monitoreo.Errores.Add("Excepción: " + ex.Message);
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex);
                 await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 _logger.LogError(ex, "Error al buscar temporada.");
                 throw;

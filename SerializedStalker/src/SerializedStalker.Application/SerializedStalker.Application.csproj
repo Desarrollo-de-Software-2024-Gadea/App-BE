@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Notificaciones\NewFile1.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SerializedStalker.Domain\SerializedStalker.Domain.csproj" />
     <ProjectReference Include="..\SerializedStalker.Application.Contracts\SerializedStalker.Application.Contracts.csproj" />
   </ItemGroup>

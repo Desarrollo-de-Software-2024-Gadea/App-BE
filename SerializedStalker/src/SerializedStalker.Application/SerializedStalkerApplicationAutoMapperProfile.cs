@@ -1,4 +1,6 @@
 using AutoMapper;
+using SerializedStalker.Application.Contracts.Notificaciones;
+using SerializedStalker.Domain.Notificaciones;
 using SerializedStalker.Series;
 
 namespace SerializedStalker;
@@ -27,6 +29,10 @@ public class SerializedStalkerApplicationAutoMapperProfile : Profile
         //Monitoreo
         CreateMap<MonitoreoApiDto, MonitoreoApi>();
         CreateMap<MonitoreoApi, MonitoreoApiDto>();
+
+        //Notificacion
+        CreateMap<NotificacionDto, Notificacion>();
+
 
     }
 }

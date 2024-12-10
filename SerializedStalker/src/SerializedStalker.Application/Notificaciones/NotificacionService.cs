@@ -16,6 +16,41 @@ namespace SerializedStalker.Notificaciones
         private readonly ILogger<NotificacionService> _logger;
 
         /// <summary>
+        /// Muestra las notificaciones no leídas en pantalla para un usuario específico.
+        /// </summary>
+        /// <param name="usuarioId">El identificador del usuario para el cual se obtendrán las notificaciones.</param>
+        /// <returns>Una lista de objetos <see cref="NotificacionDto"/> que representan las notificaciones no leídas.</returns>
+        /// <exception cref="Exception">Se lanza si hay un error al obtener las notificaciones del repositorio.</exception>
+        public List<NotificacionDto> MostrarNotificacionesPantalla(int usuarioId)
+        {
+            _logger.LogInformation("Obteniendo notificaciones no leídas para el usuario {UsuarioId}", usuarioId);
+
+            try
+            {
+                var notificaciones = _notificacionRepository.GetNotificacionesNoLeidasAsync(usuarioId).Result;
+                _logger.LogInformation("Se obtuvieron {Count} notificaciones no leídas para el usuario {UsuarioId}", notificaciones.Count, usuarioId);
+
+                var notificacionesDto = notificaciones.Select(n => new NotificacionDto
+                {
+                    UsuarioId = n.UsuarioId,
+                    Titulo = n.Titulo,
+                    Mensaje = n.Mensaje,
+                    Leida = n.Leida,
+                    Tipo = n.Tipo
+                }).ToList();
+
+                _logger.LogInformation("Se convirtieron las notificaciones a DTOs para el usuario {UsuarioId}", usuarioId);
+
+                return notificacionesDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las notificaciones no leídas para el usuario {UsuarioId}", usuarioId);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="NotificacionService"/>.
         /// </summary>
         /// <param name="notificacionRepository">El repositorio de notificaciones.</param>

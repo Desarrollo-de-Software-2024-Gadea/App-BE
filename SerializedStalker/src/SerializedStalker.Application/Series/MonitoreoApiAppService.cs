@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using Volo.Abp.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace SerializedStalker.Series
 {
@@ -109,5 +110,28 @@ namespace SerializedStalker.Series
                 throw;
             }
         }
+        public async Task<MonitoreoApiDto> IniciarMonitoreo()
+        {
+            var monitoreo = new MonitoreoApiDto
+            {
+                HoraEntrada = DateTime.Now
+            };
+            return monitoreo;
+        }
+
+        public async Task<MonitoreoApiDto> FinalizarMonitoreo(MonitoreoApiDto monitoreo)
+        {
+            monitoreo.HoraSalida = DateTime.Now;
+            monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+            return monitoreo;
+        }
+        public async Task<MonitoreoApiDto> ErrorMonitoreo(MonitoreoApiDto monitoreo, Exception ex)
+        {
+            monitoreo.HoraSalida = DateTime.Now;
+            monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
+            monitoreo.Errores.Add("Excepción: " + ex.Message);
+            return monitoreo;
+        }
+
     }
 }
