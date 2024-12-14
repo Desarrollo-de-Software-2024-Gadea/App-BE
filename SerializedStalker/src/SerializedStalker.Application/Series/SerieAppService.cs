@@ -233,38 +233,20 @@ namespace SerializedStalker.Series
                     seriesExistentes = new List<Serie>();
                 }
 
-                 foreach (var serieDto in seriesDto)
+                foreach (var serieDto in seriesDto)
                 {
                     if (serieDto == null) continue;
-
-                    /*var userIdActual = _currentUserService.GetCurrentUserId();
-                    if (!userIdActual.HasValue)
-                    {
-                        throw new InvalidOperationException("User ID cannot be null");
-                    }*/
 
                     if (serieDto.ImdbIdentificator == null)
                     {
                         throw new InvalidOperationException("ImdbIdentificator cannot be null");
                     }
 
-                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator/* && s.CreatorId == userIdActual.Value*/);
+                    var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbIdentificator == serieDto.ImdbIdentificator);
 
                     if (serieExistente == null)
                     {
-                        var nuevaSerie = _objectMapper.Map<SerieDto, Serie>(serieDto);
-                        nuevaSerie.Temporadas = new List<Temporada>();
-                        //nuevaSerie.CreatorId = userIdActual.Value;
-
-                        if (serieDto.Temporadas != null)
-                        {
-                            foreach (var temporadaDto in serieDto.Temporadas)
-                            {
-                                var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
-                                nuevaSerie.Temporadas.Add(nuevaTemporada);
-                            }
-                        }
-
+                        var nuevaSerie = MapSerieDtoToSerie(serieDto);
                         await _serieRepository.InsertAsync(nuevaSerie);
                     }
                     else
@@ -276,23 +258,7 @@ namespace SerializedStalker.Series
                         else
                         {
                             serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
-                            if (serieDto.Temporadas != null)
-                            {
-                                foreach (var temporadaDto in serieDto.Temporadas)
-                                {
-                                    var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
-                                    if (temporadaExistente == null)
-                                    {
-                                        var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
-                                        serieExistente.Temporadas.Add(nuevaTemporada);
-                                    }
-                                    else
-                                    {
-                                        _objectMapper.Map(temporadaDto, temporadaExistente);
-                                    }
-                                }
-                            }
-
+                            UpdateTemporadas(serieExistente, serieDto.Temporadas.ToList());
                             await _serieRepository.UpdateAsync(serieExistente);
                         }
                     }
@@ -303,6 +269,53 @@ namespace SerializedStalker.Series
             {
                 _logger.LogError(ex, "Error al persistir las series.");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Mapea un objeto SerieDto a un objeto Serie.
+        /// </summary>
+        /// <param name="serieDto">El objeto SerieDto a mapear.</param>
+        /// <returns>Un objeto Serie que representa la serie mapeada.</returns>
+        private Serie MapSerieDtoToSerie(SerieDto serieDto)
+        {
+            var serie = _objectMapper.Map<SerieDto, Serie>(serieDto);
+            serie.Temporadas = new List<Temporada>();
+
+            if (serieDto.Temporadas != null)
+            {
+                foreach (var temporadaDto in serieDto.Temporadas)
+                {
+                    var temporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                    serie.Temporadas.Add(temporada);
+                }
+            }
+
+            return serie;
+        }
+
+        /// <summary>
+        /// Actualiza las temporadas de una serie existente con los datos proporcionados en una lista de TemporadaDto.
+        /// </summary>
+        /// <param name="serieExistente">El objeto Serie existente a actualizar.</param>
+        /// <param name="temporadasDto">La lista de objetos TemporadaDto que contienen los datos de las temporadas a actualizar.</param>
+        private void UpdateTemporadas(Serie serieExistente, List<TemporadaDto> temporadasDto)
+        {
+            if (temporadasDto != null)
+            {
+                foreach (var temporadaDto in temporadasDto)
+                {
+                    var temporadaExistente = serieExistente.Temporadas.FirstOrDefault(t => t.NumeroTemporada == temporadaDto.NumeroTemporada);
+                    if (temporadaExistente == null)
+                    {
+                        var nuevaTemporada = _objectMapper.Map<TemporadaDto, Temporada>(temporadaDto);
+                        serieExistente.Temporadas.Add(nuevaTemporada);
+                    }
+                    else
+                    {
+                        _objectMapper.Map(temporadaDto, temporadaExistente);
+                    }
+                }
             }
         }
 
