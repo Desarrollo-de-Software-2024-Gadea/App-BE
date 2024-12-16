@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SerializedStalker.ListasDeSeguimiento;
 using Volo.Abp.Domain.Repositories;
+using SerializedStalker.Domain.Notificaciones;
+using SerializedStalker.Notificaciones;
+using SerializedStalker.EntityFrameworkCore.Notificaciones;
 
 namespace SerializedStalker
 {
@@ -18,6 +21,7 @@ namespace SerializedStalker
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly IRepository<ListaDeSeguimiento, int> _listaDeSeguimientoRepository;
         private readonly IRepository<MonitoreoApi, int> _monitoreoApiRepository;
+        private readonly IRepository<Notificacion, int> _notificacionRepository;
         private readonly ICurrentTenant _currentTenant;
         private readonly SerializedStalkerDbContext _context;
         private readonly ILogger<SerializedStalkerTestDataSeedContributor> _logger;
@@ -27,12 +31,14 @@ namespace SerializedStalker
             IRepository<Serie, int> serieRepository, 
             IRepository<ListaDeSeguimiento, int> listaDeSeguimientoRepository,
             IRepository<MonitoreoApi, int> monitoreoApiRepository,
+            IRepository<Notificacion, int> notificacionRepository,
             ICurrentTenant currentTenant, SerializedStalkerDbContext context, 
             ILogger<SerializedStalkerTestDataSeedContributor> logger)
         {
             _serieRepository = serieRepository;
             _listaDeSeguimientoRepository = listaDeSeguimientoRepository;
             _monitoreoApiRepository = monitoreoApiRepository;
+            _notificacionRepository = notificacionRepository;
             _currentTenant = currentTenant;
             _context = context;
             _logger = logger;
@@ -104,6 +110,15 @@ namespace SerializedStalker
                     Errores = new List<string> { "Error 2", "Error 3" }
                 };
                 await _monitoreoApiRepository.InsertAsync(monitoreoSEED3);
+
+                var notificacion1 = new Notificacion
+                {
+                    UsuarioId = 1,
+                    Titulo = "Titulo X0",
+                    Mensaje = "Nuevo episodio que no vas a ver",
+                    Leida = false
+                };
+                await _notificacionRepository.InsertAsync(notificacion1);
 
                 //_logger.LogInformation("Serie de prueba creada con ID: {SerieId}", serie.Id);
             }

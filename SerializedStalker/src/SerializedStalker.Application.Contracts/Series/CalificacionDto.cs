@@ -11,8 +11,8 @@ namespace SerializedStalker.Series
     public class CalificacionDto
     {
         [Range(1, 5, ErrorMessage = "La calificación debe estar entre 1 y 5")]
-        public float calificacion { get; set; }
-        public string comentario { get; set; }
+        public float NroCalificacion { get; set; }
+        public string Comentario { get; set; }
         public DateTime FechaCreacion { get; set; }
 
         //Foreign key

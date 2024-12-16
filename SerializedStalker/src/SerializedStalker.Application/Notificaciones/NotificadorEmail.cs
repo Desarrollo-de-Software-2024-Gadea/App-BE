@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using SerializedStalker.Application.Contracts.Notificaciones;
 using SerializedStalker.Domain.Notificaciones;
 using SerializedStalker.Notificaciones;
+using System.Net.Mail;
+using System.Net;
 
 namespace SerializedStalker.Application.Notificaciones
 {
@@ -38,7 +40,6 @@ namespace SerializedStalker.Application.Notificaciones
         /// <exception cref="Exception">Se lanza si hay un error al enviar el correo electrónico.</exception>
         public async Task EnviarNotificacionAsync(NotificacionDto notificacionDto)
         {
-            // Convertir DTO a entidad de dominio
             var notificacion = new Notificacion
             {
                 UsuarioId = notificacionDto.UsuarioId,
@@ -46,16 +47,37 @@ namespace SerializedStalker.Application.Notificaciones
                 Mensaje = notificacionDto.Mensaje,
                 Leida = false,
                 Tipo = notificacionDto.Tipo,
+                FechaCreacion = notificacionDto.FechaCreacion
             };
 
             try
             {
                 _logger.LogInformation("Enviando notificación por correo electrónico al usuario {UsuarioId} con título {Titulo}", notificacion.UsuarioId, notificacion.Titulo);
 
-                // Lógica para enviar un correo electrónico usando notificacion.Titulo y notificacion.Mensaje
-                // Simulación de envío de correo:
-                await Task.Delay(1000); // Simula el tiempo de envío de un correo
-                Console.WriteLine($"Email enviado a usuario {notificacion.UsuarioId}: {notificacion.Titulo} - {notificacion.Mensaje}");
+                var fromAddress = new MailAddress("tu-email@example.com", "Tu Nombre");
+                var toAddress = new MailAddress("usuario@example.com", "Usuario");
+                const string fromPassword = "tu-contraseña";
+                string subject = notificacion.Titulo;
+                string body = notificacion.Mensaje;
+
+                var smtp = new SmtpClient
+                {
+                    Host = "smtp.example.com",
+                    Port = 587,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+                };
+
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = subject,
+                    Body = body
+                })
+                {
+                    await smtp.SendMailAsync(message);
+                }
 
                 _logger.LogInformation("Correo electrónico enviado exitosamente al usuario {UsuarioId}", notificacion.UsuarioId);
             }

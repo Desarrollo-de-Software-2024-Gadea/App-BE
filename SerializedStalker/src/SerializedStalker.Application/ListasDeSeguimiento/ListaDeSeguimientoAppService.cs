@@ -69,7 +69,12 @@ namespace SerializedStalker.ListasDeSeguimiento
                 _logger.LogInformation("Nueva lista de seguimiento creada para el usuario {UserId}", userId);
             }
 
-            if (!listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieDto.ImdbIdentificator))
+            if (listaDeSeguimiento.Series.Any(s => s.ImdbIdentificator == serieDto.ImdbIdentificator))
+            {
+                _logger.LogWarning("La serie {SerieId} ya está en la lista de seguimiento del usuario {UserId}", serieDto.Id, userId);
+                throw new Exception("La serie ya está en la lista de seguimiento.");
+            }
+            else
             {
                 var seriesDto = new List<SerieDto> { serieDto };
                 await _serieAppService.PersistirSeriesAsync(seriesDto.ToArray());
@@ -77,11 +82,6 @@ namespace SerializedStalker.ListasDeSeguimiento
                 listaDeSeguimiento.Series.Add(serie);
                 listaDeSeguimiento.FechaModificacion = DateOnly.FromDateTime(DateTime.Now);
                 _logger.LogInformation("Serie {SerieId} agregada a la lista de seguimiento del usuario {UserId}", serie.Id, userId);
-            }
-            else
-            {
-                _logger.LogWarning("La serie {SerieId} ya está en la lista de seguimiento del usuario {UserId}", serieDto.Id, userId);
-                throw new Exception("La serie ya está en la lista de seguimiento.");
             }
 
             await _listaDeSeguimientoRepository.UpdateAsync(listaDeSeguimiento);

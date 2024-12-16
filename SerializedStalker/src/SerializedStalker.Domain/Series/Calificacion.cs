@@ -11,8 +11,8 @@ namespace SerializedStalker.Series
 {
     public class Calificacion : Entity<int>
     {
-        public float calificacion {  get; set; }
-        public string comentario { get; set; }
+        public float NroCalificacion {  get; set; }
+        public string Comentario { get; set; }
         public DateTime FechaCreacion { get; set; }
 
         //Foreign key
