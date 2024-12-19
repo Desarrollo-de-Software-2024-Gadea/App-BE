@@ -1,0 +1,21 @@
+<h2>Series Persistidas</h2>
+<div class="series-container" *ngIf="persistedSeries.length">
+  <div class="serie-card" *ngFor="let serie of persistedSeries">
+    <img *ngIf="serie.poster !== 'N/A'" [src]="serie.poster" alt="{{ serie.titulo }}" class="serie-poster"/>
+    <div class="serie-details">
+      <h3>{{ serie.titulo }}</h3>
+      <p><strong>Año:</strong> {{ serie.fechaEstreno }}</p>
+      <p><strong>Generos:</strong> {{ serie.generos }}</p>
+      <p><strong>Duración:</strong> {{ serie.duracion }}</p>
+      <p><strong>Actores:</strong> {{ serie.actores }}</p>
+      <p><strong>Directores:</strong> {{ serie.directores }}</p>
+      <p><strong>Escritores:</strong> {{ serie.escritores }}</p>
+      <p><strong>País de Origen:</strong> {{ serie.pais }}</p>
+      <p><strong>Calificación de IMDB:</strong> {{ serie.imdbPuntuacion }}</p>
+      <p><strong>Sinopsis:</strong> {{ serie.sinopsis }}</p>
+    </div>
+  </div>
+</div>
+<div *ngIf="!persistedSeries.length">
+  <p>No hay series persistidas.</p>
+</div>

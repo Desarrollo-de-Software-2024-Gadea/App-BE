@@ -1,0 +1,63 @@
+/* Estilos para la sección de estadísticas */
+.estadisticas {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  margin: 30px auto;
+  width: 80%;
+  gap: 20px;
+}
+
+.tarjeta {
+  background-color: #fff;
+  padding: 40px; /* Aumentar el padding para agrandar los botones */
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.5s ease-in-out;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.tarjeta:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tarjeta h3 {
+  font-size: 28px; /* Aumentar el tamaño de la fuente */
+  color: #2980b9;
+  margin-top: 20px; /* Aumentar el margen superior */
+}
+
+.tarjeta p {
+  font-size: 18px; /* Aumentar el tamaño de la fuente */
+  color: #7f8c8d;
+}
+
+.tarjeta i {
+  font-size: 50px; /* Aumentar el tamaño del ícono */
+  color: #2980b9;
+  margin-bottom: 20px; /* Aumentar el margen inferior */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
