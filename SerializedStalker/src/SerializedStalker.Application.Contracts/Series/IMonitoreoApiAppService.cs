@@ -15,6 +15,6 @@ namespace SerializedStalker.Series
         Task<MonitoreoApiEstadisticasDto> ObtenerEstadisticasAsync();
         Task<MonitoreoApiDto> IniciarMonitoreo();
         Task<MonitoreoApiDto> FinalizarMonitoreo(MonitoreoApiDto monitoreo);
-        Task<MonitoreoApiDto> ErrorMonitoreo(MonitoreoApiDto monitoreo, Exception ex);
+        Task<MonitoreoApiDto> ErrorMonitoreo(MonitoreoApiDto monitoreo, string ex);
     }
 }

@@ -125,13 +125,12 @@ namespace SerializedStalker.Series
             monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
             return monitoreo;
         }
-        public async Task<MonitoreoApiDto> ErrorMonitoreo(MonitoreoApiDto monitoreo, Exception ex)
+        public async Task<MonitoreoApiDto> ErrorMonitoreo(MonitoreoApiDto monitoreo, string ex)
         {
             monitoreo.HoraSalida = DateTime.Now;
             monitoreo.TiempoDuracion = (float)(monitoreo.HoraSalida - monitoreo.HoraEntrada).TotalSeconds;
-            monitoreo.Errores.Add("Excepción: " + ex.Message);
+            monitoreo.Errores.Add("Excepción: " + ex);
             return monitoreo;
         }
-
     }
 }

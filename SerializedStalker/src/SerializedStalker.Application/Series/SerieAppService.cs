@@ -66,8 +66,8 @@ namespace SerializedStalker.Series
             }
             catch (Exception ex)
             {
-                monitoreo.HoraSalida = DateTime.Now;
-                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex);
+                var message = ex.Message;
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, message);
                 await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 _logger.LogError(ex, "Error al buscar series.");
                 throw;
@@ -95,7 +95,8 @@ namespace SerializedStalker.Series
             }
             catch (Exception ex)
             {
-                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex);
+                var message = ex.Message;
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, message);
                 await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 _logger.LogError(ex, "Error al buscar temporada.");
                 throw;
